@@ -27,6 +27,8 @@ final class ViewController: UIViewController {
         view.addSubview(pagerView)
         pagerView.selectionHandler = self
         pagerView.loadMoreProvider = loadMoreProvider
+        pagerView.pageExposureHandler = self
+        pagerView.itemExposureHandler = self
         pagerView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(12)
             make.leading.trailing.equalToSuperview()
@@ -93,6 +95,24 @@ final class ViewController: UIViewController {
 
 extension ViewController: PagerMenuSelectionHandling {
     func pagerView(_ pagerView: MultiCategoryPagerView, didSelect page: PageModel, at index: Int) {
-        print("Selected page \(page.pageId) at index \(index)")
+        print("📌 Selected page \(page.pageId) at index \(index)")
+    }
+}
+
+// MARK: - PagerPageExposureHandling
+
+extension ViewController: PagerPageExposureHandling {
+    func pagerView(_ pagerView: MultiCategoryPagerView, didExposePage page: PageModel, at index: Int) {
+        let category = dataStore.category(for: page.pageId)
+        print("📊 [Page 曝光] \(category?.title ?? "Unknown") (index: \(index))")
+    }
+}
+
+// MARK: - PagerItemExposureHandling
+
+extension ViewController: PagerItemExposureHandling {
+    func pagerView(_ pagerView: MultiCategoryPagerView, didExposeItem item: PageItemModel, at indexPath: IndexPath, page: PageModel) {
+        let feedItem = item.payload as? DemoFeedItem
+        print("👁 [Item 曝光] \(feedItem?.title ?? "Unknown") (row: \(indexPath.item)) in page \(page.pageId)")
     }
 }

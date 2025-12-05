@@ -103,6 +103,24 @@ protocol PagerLoadMoreProviding: AnyObject {
 }
 ```
 
+### PagerPageExposureHandling
+
+```swift
+protocol PagerPageExposureHandling: AnyObject {
+    // Page 曝光（切换到某个 page 并停止滚动时触发）
+    func pagerView(_:didExposePage:at:)
+}
+```
+
+### PagerItemExposureHandling
+
+```swift
+protocol PagerItemExposureHandling: AnyObject {
+    // Item 曝光（item 出现在可视区域时触发）
+    func pagerView(_:didExposeItem:at:page:)
+}
+```
+
 ## 滚动偏移缓存
 
 `PageScrollCache` + `isRestoringOffset` 标志位解决复用问题：
@@ -130,7 +148,9 @@ public final class MultiCategoryPagerView: UIView {
     weak var presentationProvider: PagerPagePresentationProviding?
     weak var dataRenderer: PagerPageDataRendering?
     weak var selectionHandler: PagerMenuSelectionHandling?
-    weak var loadMoreProvider: PagerLoadMoreProviding?  // 可选：加载更多
+    weak var loadMoreProvider: PagerLoadMoreProviding?      // 可选：加载更多
+    weak var pageExposureHandler: PagerPageExposureHandling? // 可选：Page 曝光
+    weak var itemExposureHandler: PagerItemExposureHandling? // 可选：Item 曝光
     
     // 数据驱动
     func apply(sections: [PagerSectionSnapshot], animated: Bool)
