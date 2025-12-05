@@ -9,6 +9,8 @@ import SnapKit
 final class DemoPageDataAdapter: PagerPageDataRendering {
 
     private weak var dataStore: DemoDataStore?
+    /// 外部点击回调（可在 VC 内设置）
+    var onItemTapped: ((DemoFeedItem?, PageModel, IndexPath) -> Void)?
 
     init(dataStore: DemoDataStore) {
         self.dataStore = dataStore
@@ -144,8 +146,9 @@ final class DemoPageDataAdapter: PagerPageDataRendering {
         at indexPath: IndexPath,
         page: PageModel
     ) {
-        let feedTitle = (item.payload as? DemoFeedItem)?.title ?? ""
-        print("Tapped feed \(feedTitle) under page \(page.pageId)")
+        let feedItem = item.payload as? DemoFeedItem
+        // 回调给外部（如 VC）处理点击逻辑
+        onItemTapped?(feedItem, page, indexPath)
     }
 }
 

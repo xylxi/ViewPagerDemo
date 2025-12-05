@@ -38,6 +38,12 @@ final class ViewController: UIViewController {
         pagerView.loadMoreProvider = loadMoreProvider
         pagerView.pageExposureHandler = self
         pagerView.itemExposureHandler = self
+        dataAdapter.onItemTapped = { [weak self] feedItem, page, indexPath in
+            guard let _ = self else { return }
+            let title = feedItem?.title ?? "Unknown"
+            print("✅ [Item 点击] \(title) at row \(indexPath.item) in page \(page.pageId)")
+            // TODO: 在这里对接跳转、上报或弹窗等业务逻辑
+        }
         pagerView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(12)
             make.leading.trailing.equalToSuperview()

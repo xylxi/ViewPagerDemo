@@ -44,6 +44,10 @@ final class DemoPageStateProvider: PagerPagePresentationProviding {
                 return nil
             }
             cell.render(state: viewModel.viewState)
+            // 失败态点击重试 → 直接驱动 ViewModel.retry()
+            cell.onRetry = { [weak viewModel] in
+                viewModel?.retry()
+            }
             return cell
         }
     }
