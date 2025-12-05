@@ -1,6 +1,7 @@
 #if canImport(UIKit)
 import UIKit
 import SnapKit
+import MJRefresh
 
 final class PagerPageDataCell: UICollectionViewCell, UICollectionViewDelegate {
     static let reuseIdentifier = "PagerPageDataCell"
@@ -22,6 +23,7 @@ final class PagerPageDataCell: UICollectionViewCell, UICollectionViewDelegate {
     private weak var pagerView: MultiCategoryPagerView?
     private weak var adapter: PagerPageDataRendering?
     private weak var scrollCache: PageScrollCache?
+    private weak var loadMoreProvider: PagerLoadMoreProviding?
     private var currentPage: PageModel?
     private var currentItems: [PageItemModel] = []
     private var hasRegistered = false
@@ -52,6 +54,10 @@ final class PagerPageDataCell: UICollectionViewCell, UICollectionViewDelegate {
         currentItems = []
         adapter = nil
         pagerView = nil
+        loadMoreProvider = nil
+        // 重置 footer
+        collectionView.mj_footer?.resetNoMoreData()
+        collectionView.mj_footer = nil
         collectionView.setContentOffset(.zero, animated: false)
         isRestoringOffset = false
     }
@@ -59,10 +65,12 @@ final class PagerPageDataCell: UICollectionViewCell, UICollectionViewDelegate {
     func configure(with page: PageModel,
                    pagerView: MultiCategoryPagerView,
                    adapter: PagerPageDataRendering,
-                   scrollCache: PageScrollCache) {
+                   scrollCache: PageScrollCache,
+                   loadMoreProvider: PagerLoadMoreProviding?) {
         self.pagerView = pagerView
         self.adapter = adapter
         self.scrollCache = scrollCache
+        self.loadMoreProvider = loadMoreProvider
         currentPage = page
 
         if !hasRegistered {
@@ -81,10 +89,23 @@ final class PagerPageDataCell: UICollectionViewCell, UICollectionViewDelegate {
         let items = adapter.pagerView(pagerView, itemsFor: page)
         currentItems = items
         
+        // 配置加载更多 footer
+        configureLoadMoreFooter(for: page, pagerView: pagerView)
+        
         let cachedOffset = scrollCache.offset(for: page.pageId)
         apply(items: items, animated: false) { [weak self] in
             self?.restoreContentOffset(cachedOffset, for: page)
         }
+    }
+    
+    private func configureLoadMoreFooter(for page: PageModel, pagerView: MultiCategoryPagerView) {
+        guard let provider = loadMoreProvider else {
+            collectionView.mj_footer = nil
+            return
+        }
+        
+        // 外部提供已配置好状态的 footer（可能为 nil）
+        collectionView.mj_footer = provider.pagerView(pagerView, loadMoreFooterFor: page)
     }
 
     private func ensureDataSource(adapter: PagerPageDataRendering, pagerView: MultiCategoryPagerView) {

@@ -23,6 +23,7 @@ public final class MultiCategoryPagerView: UIView {
         didSet { pageCollectionView.reloadData() }
     }
     public weak var selectionHandler: PagerMenuSelectionHandling?
+    public weak var loadMoreProvider: PagerLoadMoreProviding?
 
     public init(menuLayout: UICollectionViewLayout? = nil,
                 menuProvider: PagerMenuContentProviding,
@@ -61,7 +62,14 @@ public final class MultiCategoryPagerView: UIView {
         sectionSnapshots[position.sectionIndex].pages[position.pageIndex] = target
         rebuildCaches()
         applyMenuSnapshot(animated: animated)
-        applyPageSnapshot(animated: animated)
+        
+        // 使用 reloadItems 强制刷新指定 page 的 cell，确保内部数据列表更新
+        var snapshot = pageDataSource.snapshot()
+        let itemsToReload = snapshot.itemIdentifiers.filter { $0.pageId == pageId }
+        if !itemsToReload.isEmpty {
+            snapshot.reloadItems(itemsToReload)
+        }
+        pageDataSource.apply(snapshot, animatingDifferences: animated)
     }
 
     public func selectPage(at index: Int, animated: Bool) {
@@ -133,7 +141,8 @@ public final class MultiCategoryPagerView: UIView {
             cell.configure(with: page,
                            pagerView: self,
                            adapter: renderer,
-                           scrollCache: self.scrollCache)
+                           scrollCache: self.scrollCache,
+                           loadMoreProvider: self.loadMoreProvider)
             return cell
         }
     }()

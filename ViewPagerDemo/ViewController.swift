@@ -7,6 +7,9 @@ final class ViewController: UIViewController {
     private lazy var menuProvider = DemoMenuProvider()
     private lazy var stateProvider = DemoPageStateProvider(dataStore: dataStore)
     private lazy var dataAdapter = DemoPageDataAdapter(dataStore: dataStore)
+    private lazy var loadMoreProvider = DemoLoadMoreProvider(dataStore: dataStore) { [weak self] page in
+        self?.loadMore(for: page)
+    }
     private lazy var pagerView = MultiCategoryPagerView(menuProvider: menuProvider,
                                                         pagePresentationProvider: stateProvider,
                                                         pageDataRenderer: dataAdapter)
@@ -24,6 +27,7 @@ final class ViewController: UIViewController {
     private func setupPager() {
         view.addSubview(pagerView)
         pagerView.selectionHandler = self
+        pagerView.loadMoreProvider = loadMoreProvider
         pagerView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(12)
             make.leading.trailing.equalToSuperview()
@@ -56,6 +60,34 @@ final class ViewController: UIViewController {
             }
         }
     }
+    
+    private func loadMore(for page: PageModel) {
+        let pageId = page.pageId
+        
+        // MJRefresh 触发回调时已自动进入 refreshing 状态，直接进行网络请求
+        // 模拟网络请求
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            guard let self else { return }
+            
+            // 获取更多数据
+            let newItems = self.dataStore.makeMoreItems(for: pageId)
+            
+            // 模拟：加载 3 次后没有更多数据
+            let currentPage = self.dataStore.pageData(for: pageId)?.currentPage ?? 0
+            let hasMore = currentPage < 2
+            
+            // 更新数据
+            self.dataStore.appendItems(pageId: pageId, newItems: newItems, hasMore: hasMore)
+            
+            // 刷新 pagerView
+            self.pagerView.update(pageId: pageId, animated: false) { _ in }
+            
+            // 结束加载，更新 footer 状态
+            self.loadMoreProvider.endRefreshing(for: pageId, hasMore: hasMore)
+            
+            print("Loaded more items for \(pageId), hasMore: \(hasMore)")
+        }
+    }
 }
 
 extension ViewController: PagerMenuSelectionHandling {
@@ -79,6 +111,8 @@ final class DemoDataStore {
     struct PageData {
         var state: PageState = .loading
         var items: [PageItemModel] = []
+        var hasMore: Bool = true           // 是否还有更多数据
+        var currentPage: Int = 0           // 当前页码
     }
     
     private(set) var categories: [DemoCategoryMeta] = []
@@ -128,9 +162,28 @@ final class DemoDataStore {
     
     func makeItems(for pageId: AnyHashable) -> [PageItemModel] {
         guard let category = category(for: pageId) else { return [] }
-        let feeds = (0..<30).map { index -> DemoFeedItem in
+        let feeds = (0..<20).map { index -> DemoFeedItem in
             DemoFeedItem(title: "\(category.title) Item \(index + 1)",
                          subtitle: "示例描述第 \(index + 1) 行，展示多分类数据流效果。")
+        }
+        return feeds.map { PageItemModel(id: $0.id, payload: $0) }
+    }
+    
+    // MARK: - Load More Support
+    
+    func appendItems(pageId: AnyHashable, newItems: [PageItemModel], hasMore: Bool) {
+        pageDataMap[pageId]?.items.append(contentsOf: newItems)
+        pageDataMap[pageId]?.hasMore = hasMore
+        pageDataMap[pageId]?.currentPage += 1
+    }
+    
+    func makeMoreItems(for pageId: AnyHashable) -> [PageItemModel] {
+        guard let category = category(for: pageId),
+              let pageData = pageDataMap[pageId] else { return [] }
+        let startIndex = pageData.items.count
+        let feeds = (0..<10).map { index -> DemoFeedItem in
+            DemoFeedItem(title: "\(category.title) Item \(startIndex + index + 1)",
+                         subtitle: "加载更多示例第 \(startIndex + index + 1) 行。")
         }
         return feeds.map { PageItemModel(id: $0.id, payload: $0) }
     }
@@ -411,6 +464,68 @@ final class DemoFeedCell: UICollectionViewCell {
     func configure(with item: DemoFeedItem?) {
         titleLabel.text = item?.title ?? "未命名 Item"
         subtitleLabel.text = item?.subtitle ?? ""
+    }
+}
+
+// MARK: - Demo Load More Provider
+
+final class DemoLoadMoreProvider: PagerLoadMoreProviding {
+    
+    private weak var dataStore: DemoDataStore?
+    private var loadMoreHandler: ((PageModel) -> Void)?
+    
+    /// Footer 缓存：pageId -> footer，避免重复创建
+    private var footerCache: [AnyHashable: MJRefreshAutoNormalFooter] = [:]
+    
+    init(dataStore: DemoDataStore, loadMoreHandler: @escaping (PageModel) -> Void) {
+        self.dataStore = dataStore
+        self.loadMoreHandler = loadMoreHandler
+    }
+    
+    func pagerView(_ pagerView: MultiCategoryPagerView,
+                   loadMoreFooterFor page: PageModel) -> MJRefreshFooter? {
+        guard let pageData = dataStore?.pageData(for: page.pageId) else {
+            return nil
+        }
+        
+        // 只有 loaded 状态且有数据时才返回 footer
+        guard case .loaded = pageData.state, !pageData.items.isEmpty else {
+            return nil
+        }
+        
+        // 获取或创建 footer
+        let footer = footerCache[page.pageId] ?? createFooter(for: page)
+        
+        // 根据 hasMore 状态配置 footer（仅在 cell 首次配置时生效）
+        if !pageData.hasMore {
+            footer.endRefreshingWithNoMoreData()
+        }
+        
+        return footer
+    }
+    
+    /// 结束加载更多，更新 footer 状态
+    func endRefreshing(for pageId: AnyHashable, hasMore: Bool) {
+        guard let footer = footerCache[pageId] else { return }
+        if hasMore {
+            footer.endRefreshing()
+        } else {
+            footer.endRefreshingWithNoMoreData()
+        }
+    }
+    
+    private func createFooter(for page: PageModel) -> MJRefreshAutoNormalFooter {
+        let footer = MJRefreshAutoNormalFooter { [weak self] in
+            self?.loadMoreHandler?(page)
+        }
+        footer.setTitle("上拉加载更多", for: .idle)
+        footer.setTitle("正在加载...", for: .refreshing)
+        footer.setTitle("— 已经到底了 —", for: .noMoreData)
+        footer.stateLabel?.font = UIFont.systemFont(ofSize: 14)
+        footer.stateLabel?.textColor = .secondaryLabel
+        
+        footerCache[page.pageId] = footer
+        return footer
     }
 }
 

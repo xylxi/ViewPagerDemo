@@ -1,5 +1,6 @@
 #if canImport(UIKit)
 import UIKit
+import MJRefresh
 
 public protocol PagerMenuContentProviding: AnyObject {
     func registerMenuCells(in collectionView: UICollectionView)
@@ -39,6 +40,18 @@ public extension PagerPageDataRendering {
 
 public protocol PagerMenuSelectionHandling: AnyObject {
     func pagerView(_ pagerView: MultiCategoryPagerView, didSelect page: PageModel, at index: Int)
+}
+
+/// 加载更多能力提供者
+/// - Note: 组件不感知 footer 的具体实现，由外部创建并配置
+/// - Note: 每次 cell 配置时会调用此方法，外部应根据当前数据状态返回正确状态的 footer
+public protocol PagerLoadMoreProviding: AnyObject {
+    /// 获取指定 page 的加载更多 footer
+    /// - Note: 仅在数据页面（非状态页面）时会被调用
+    /// - Note: 外部应根据数据状态配置 footer（idle/refreshing/noMoreData）
+    /// - Returns: 返回配置好的 footer 实例，返回 nil 表示不需要加载更多
+    func pagerView(_ pagerView: MultiCategoryPagerView,
+                   loadMoreFooterFor page: PageModel) -> MJRefreshFooter?
 }
 #endif
 
