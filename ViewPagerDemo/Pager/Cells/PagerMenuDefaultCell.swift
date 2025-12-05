@@ -1,4 +1,3 @@
-#if canImport(UIKit)
 import UIKit
 import SnapKit
 
@@ -32,5 +31,4 @@ final class PagerMenuDefaultCell: UICollectionViewCell {
         titleLabel.text = title
     }
 }
-#endif
 

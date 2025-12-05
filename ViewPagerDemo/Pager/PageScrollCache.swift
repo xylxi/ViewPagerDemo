@@ -1,4 +1,3 @@
-#if canImport(UIKit)
 import UIKit
 
 final class PageScrollCache {
@@ -29,5 +28,4 @@ final class PageScrollCache {
         lock.unlock()
     }
 }
-#endif
 

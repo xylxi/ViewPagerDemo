@@ -1,4 +1,3 @@
-#if canImport(UIKit)
 import UIKit
 import SnapKit
 
@@ -335,5 +334,3 @@ extension MultiCategoryPagerView: UIScrollViewDelegate {
         return max(0, min(index, flattenedPages.count - 1))
     }
 }
-#endif
-

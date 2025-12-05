@@ -1,4 +1,3 @@
-#if canImport(UIKit)
 import UIKit
 import MJRefresh
 
@@ -53,5 +52,3 @@ public protocol PagerLoadMoreProviding: AnyObject {
     func pagerView(_ pagerView: MultiCategoryPagerView,
                    loadMoreFooterFor page: PageModel) -> MJRefreshFooter?
 }
-#endif
-

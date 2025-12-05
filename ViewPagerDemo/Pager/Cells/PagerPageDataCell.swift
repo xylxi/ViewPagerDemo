@@ -1,4 +1,3 @@
-#if canImport(UIKit)
 import UIKit
 import SnapKit
 import MJRefresh
@@ -183,4 +182,3 @@ final class PagerPageDataCell: UICollectionViewCell, UICollectionViewDelegate {
 #endif
     }
 }
-#endif

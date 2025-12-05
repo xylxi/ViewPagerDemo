@@ -22,6 +22,12 @@
 		3B73945E2EE25CB900DF2DCF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394472EE25CB900DF2DCF /* AppDelegate.swift */; };
 		3B73945F2EE25CB900DF2DCF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B73944F2EE25CB900DF2DCF /* SceneDelegate.swift */; };
 		3B7394602EE25CB900DF2DCF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394502EE25CB900DF2DCF /* ViewController.swift */; };
+		3B7394682EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394622EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift */; };
+		3B7394692EE31ACC00DF2DCF /* DemoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394642EE31ACC00DF2DCF /* DemoModels.swift */; };
+		3B73946A2EE31ACC00DF2DCF /* DemoPageDataAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394652EE31ACC00DF2DCF /* DemoPageDataAdapter.swift */; };
+		3B73946B2EE31ACC00DF2DCF /* DemoMenuProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394632EE31ACC00DF2DCF /* DemoMenuProvider.swift */; };
+		3B73946C2EE31ACC00DF2DCF /* DemoPageStateProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */; };
+		3B73946D2EE31ACC00DF2DCF /* DemoDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394612EE31ACC00DF2DCF /* DemoDataStore.swift */; };
 		3BEAFEF12EE1DC4C0019E77E /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF02EE1DC4C0019E77E /* LookinServer */; };
 		3BEAFEF42EE1DC5C0019E77E /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF32EE1DC5C0019E77E /* SnapKit */; };
 /* End PBXBuildFile section */
@@ -42,6 +48,12 @@
 		3B73944E2EE25CB900DF2DCF /* REAMDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = REAMDE.md; sourceTree = "<group>"; };
 		3B73944F2EE25CB900DF2DCF /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		3B7394502EE25CB900DF2DCF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		3B7394612EE31ACC00DF2DCF /* DemoDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoDataStore.swift; sourceTree = "<group>"; };
+		3B7394622EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoLoadMoreProvider.swift; sourceTree = "<group>"; };
+		3B7394632EE31ACC00DF2DCF /* DemoMenuProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMenuProvider.swift; sourceTree = "<group>"; };
+		3B7394642EE31ACC00DF2DCF /* DemoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoModels.swift; sourceTree = "<group>"; };
+		3B7394652EE31ACC00DF2DCF /* DemoPageDataAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoPageDataAdapter.swift; sourceTree = "<group>"; };
+		3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoPageStateProvider.swift; sourceTree = "<group>"; };
 		3BEAFED72EE1DBEA0019E77E /* ViewPagerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ViewPagerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7056E61ABEAE327E41EAEDA2 /* Pods_ViewPagerDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ViewPagerDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFBF1E3CE1A21F4757F2EC9A /* Pods-ViewPagerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ViewPagerDemo.release.xcconfig"; path = "Target Support Files/Pods-ViewPagerDemo/Pods-ViewPagerDemo.release.xcconfig"; sourceTree = "<group>"; };
@@ -87,17 +99,31 @@
 		3B7394512EE25CB900DF2DCF /* ViewPagerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				3B7394672EE31ACC00DF2DCF /* Demo */,
 				3B7394462EE25CB900DF2DCF /* Pager */,
 				3B7394472EE25CB900DF2DCF /* AppDelegate.swift */,
+				3B7394502EE25CB900DF2DCF /* ViewController.swift */,
+				3B73944F2EE25CB900DF2DCF /* SceneDelegate.swift */,
 				3B7394482EE25CB900DF2DCF /* Assets.xcassets */,
 				3B7394492EE25CB900DF2DCF /* Info.plist */,
 				3B73944B2EE25CB900DF2DCF /* LaunchScreen.storyboard */,
 				3B73944D2EE25CB900DF2DCF /* Main.storyboard */,
 				3B73944E2EE25CB900DF2DCF /* REAMDE.md */,
-				3B73944F2EE25CB900DF2DCF /* SceneDelegate.swift */,
-				3B7394502EE25CB900DF2DCF /* ViewController.swift */,
 			);
 			path = ViewPagerDemo;
+			sourceTree = "<group>";
+		};
+		3B7394672EE31ACC00DF2DCF /* Demo */ = {
+			isa = PBXGroup;
+			children = (
+				3B7394612EE31ACC00DF2DCF /* DemoDataStore.swift */,
+				3B7394622EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift */,
+				3B7394632EE31ACC00DF2DCF /* DemoMenuProvider.swift */,
+				3B7394642EE31ACC00DF2DCF /* DemoModels.swift */,
+				3B7394652EE31ACC00DF2DCF /* DemoPageDataAdapter.swift */,
+				3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */,
+			);
+			path = Demo;
 			sourceTree = "<group>";
 		};
 		3BEAFECE2EE1DBEA0019E77E = {
@@ -269,6 +295,12 @@
 				3B73945A2EE25CB900DF2DCF /* MultiCategoryPagerView.swift in Sources */,
 				3B73945B2EE25CB900DF2DCF /* PagerModels.swift in Sources */,
 				3B73945C2EE25CB900DF2DCF /* PagerProtocols.swift in Sources */,
+				3B7394682EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift in Sources */,
+				3B7394692EE31ACC00DF2DCF /* DemoModels.swift in Sources */,
+				3B73946A2EE31ACC00DF2DCF /* DemoPageDataAdapter.swift in Sources */,
+				3B73946B2EE31ACC00DF2DCF /* DemoMenuProvider.swift in Sources */,
+				3B73946C2EE31ACC00DF2DCF /* DemoPageStateProvider.swift in Sources */,
+				3B73946D2EE31ACC00DF2DCF /* DemoDataStore.swift in Sources */,
 				3B73945D2EE25CB900DF2DCF /* PageScrollCache.swift in Sources */,
 				3B73945E2EE25CB900DF2DCF /* AppDelegate.swift in Sources */,
 				3B73945F2EE25CB900DF2DCF /* SceneDelegate.swift in Sources */,
