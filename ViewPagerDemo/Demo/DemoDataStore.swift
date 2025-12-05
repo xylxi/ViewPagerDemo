@@ -26,17 +26,25 @@ final class DemoDataStore {
     }
     
     func makeInitialSnapshots() -> [PagerSectionSnapshot] {
+        // 配置不同布局类型的分类
         categories = [
-            DemoCategoryMeta(id: "news", title: "热点", accentColor: .systemOrange),
-            DemoCategoryMeta(id: "sport", title: "体育", accentColor: .systemGreen),
-            DemoCategoryMeta(id: "tech", title: "科技", accentColor: .systemBlue),
-            DemoCategoryMeta(id: "finance", title: "财经", accentColor: .systemPurple),
-            DemoCategoryMeta(id: "travel", title: "旅行", accentColor: .systemTeal),
-            DemoCategoryMeta(id: "food", title: "美食", accentColor: .systemRed),
-            DemoCategoryMeta(id: "movie", title: "影视", accentColor: .systemIndigo),
-            DemoCategoryMeta(id: "game", title: "游戏", accentColor: .systemPink),
-            DemoCategoryMeta(id: "auto", title: "汽车", accentColor: .systemYellow),
-            DemoCategoryMeta(id: "fashion", title: "时尚", accentColor: .systemBrown)
+            // 列表布局（一行一列）
+            DemoCategoryMeta(id: "news", title: "热点", accentColor: .systemOrange, layoutType: .list),
+            DemoCategoryMeta(id: "sport", title: "体育", accentColor: .systemGreen, layoutType: .list),
+            
+            // 三列网格布局
+            DemoCategoryMeta(id: "tech", title: "科技", accentColor: .systemBlue, layoutType: .grid3),
+            DemoCategoryMeta(id: "finance", title: "财经", accentColor: .systemPurple, layoutType: .grid3),
+            DemoCategoryMeta(id: "travel", title: "旅行", accentColor: .systemTeal, layoutType: .grid3),
+            
+            // 四列网格布局
+            DemoCategoryMeta(id: "food", title: "美食", accentColor: .systemRed, layoutType: .grid4),
+            DemoCategoryMeta(id: "movie", title: "影视", accentColor: .systemIndigo, layoutType: .grid4),
+            DemoCategoryMeta(id: "game", title: "游戏", accentColor: .systemPink, layoutType: .grid4),
+            
+            // 混合：回到列表布局
+            DemoCategoryMeta(id: "auto", title: "汽车", accentColor: .systemYellow, layoutType: .list),
+            DemoCategoryMeta(id: "fashion", title: "时尚", accentColor: .systemBrown, layoutType: .grid3)
         ]
         
         // 初始化 page data
@@ -65,9 +73,26 @@ final class DemoDataStore {
     
     func makeItems(for pageId: AnyHashable) -> [PageItemModel] {
         guard let category = category(for: pageId) else { return [] }
-        let feeds = (0..<20).map { index -> DemoFeedItem in
-            DemoFeedItem(title: "\(category.title) Item \(index + 1)",
-                         subtitle: "示例描述第 \(index + 1) 行，展示多分类数据流效果。")
+        
+        // 根据布局类型生成不同数量的数据
+        let count: Int
+        switch category.layoutType {
+        case .list: count = 20
+        case .grid3: count = 30  // 网格需要更多数据才能填满
+        case .grid4: count = 40
+        }
+        
+        let feeds = (0..<count).map { index -> DemoFeedItem in
+            // 为网格布局使用不同的随机颜色
+            let colors: [UIColor] = [.systemRed, .systemBlue, .systemGreen, .systemOrange,
+                                     .systemPurple, .systemPink, .systemTeal, .systemIndigo]
+            let randomColor = colors[index % colors.count]
+            
+            return DemoFeedItem(
+                title: "\(category.title) \(index + 1)",
+                subtitle: category.layoutType == .list ? "示例描述第 \(index + 1) 行，展示多分类数据流效果。" : "",
+                imageColor: category.layoutType == .list ? .systemGray4 : randomColor
+            )
         }
         return feeds.map { PageItemModel(id: $0.id, payload: $0) }
     }
@@ -83,10 +108,26 @@ final class DemoDataStore {
     func makeMoreItems(for pageId: AnyHashable) -> [PageItemModel] {
         guard let category = category(for: pageId),
               let pageData = pageDataMap[pageId] else { return [] }
+        
+        // 根据布局类型生成不同数量的增量数据
+        let count: Int
+        switch category.layoutType {
+        case .list: count = 10
+        case .grid3: count = 15
+        case .grid4: count = 20
+        }
+        
         let startIndex = pageData.items.count
-        let feeds = (0..<10).map { index -> DemoFeedItem in
-            DemoFeedItem(title: "\(category.title) Item \(startIndex + index + 1)",
-                         subtitle: "加载更多示例第 \(startIndex + index + 1) 行。")
+        let colors: [UIColor] = [.systemRed, .systemBlue, .systemGreen, .systemOrange,
+                                 .systemPurple, .systemPink, .systemTeal, .systemIndigo]
+        
+        let feeds = (0..<count).map { index -> DemoFeedItem in
+            let randomColor = colors[(startIndex + index) % colors.count]
+            return DemoFeedItem(
+                title: "\(category.title) \(startIndex + index + 1)",
+                subtitle: category.layoutType == .list ? "加载更多示例第 \(startIndex + index + 1) 行。" : "",
+                imageColor: category.layoutType == .list ? .systemGray4 : randomColor
+            )
         }
         return feeds.map { PageItemModel(id: $0.id, payload: $0) }
     }

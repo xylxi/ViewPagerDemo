@@ -28,6 +28,7 @@
 		3B73946B2EE31ACC00DF2DCF /* DemoMenuProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394632EE31ACC00DF2DCF /* DemoMenuProvider.swift */; };
 		3B73946C2EE31ACC00DF2DCF /* DemoPageStateProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */; };
 		3B73946D2EE31ACC00DF2DCF /* DemoDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394612EE31ACC00DF2DCF /* DemoDataStore.swift */; };
+		3B73946F2EE323A900DF2DCF /* swift-style-guide.md in Resources */ = {isa = PBXBuildFile; fileRef = 3B73946E2EE323A900DF2DCF /* swift-style-guide.md */; };
 		3BEAFEF12EE1DC4C0019E77E /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF02EE1DC4C0019E77E /* LookinServer */; };
 		3BEAFEF42EE1DC5C0019E77E /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF32EE1DC5C0019E77E /* SnapKit */; };
 /* End PBXBuildFile section */
@@ -54,6 +55,7 @@
 		3B7394642EE31ACC00DF2DCF /* DemoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoModels.swift; sourceTree = "<group>"; };
 		3B7394652EE31ACC00DF2DCF /* DemoPageDataAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoPageDataAdapter.swift; sourceTree = "<group>"; };
 		3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoPageStateProvider.swift; sourceTree = "<group>"; };
+		3B73946E2EE323A900DF2DCF /* swift-style-guide.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "swift-style-guide.md"; sourceTree = "<group>"; };
 		3BEAFED72EE1DBEA0019E77E /* ViewPagerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ViewPagerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7056E61ABEAE327E41EAEDA2 /* Pods_ViewPagerDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ViewPagerDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFBF1E3CE1A21F4757F2EC9A /* Pods-ViewPagerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ViewPagerDemo.release.xcconfig"; path = "Target Support Files/Pods-ViewPagerDemo/Pods-ViewPagerDemo.release.xcconfig"; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 				3B7394492EE25CB900DF2DCF /* Info.plist */,
 				3B73944B2EE25CB900DF2DCF /* LaunchScreen.storyboard */,
 				3B73944D2EE25CB900DF2DCF /* Main.storyboard */,
+				3B73946E2EE323A900DF2DCF /* swift-style-guide.md */,
 				3B73944E2EE25CB900DF2DCF /* REAMDE.md */,
 			);
 			path = ViewPagerDemo;
@@ -232,6 +235,7 @@
 				3B7394522EE25CB900DF2DCF /* README.md in Resources */,
 				3B7394532EE25CB900DF2DCF /* Assets.xcassets in Resources */,
 				3B7394552EE25CB900DF2DCF /* LaunchScreen.storyboard in Resources */,
+				3B73946F2EE323A900DF2DCF /* swift-style-guide.md in Resources */,
 				3B7394562EE25CB900DF2DCF /* Main.storyboard in Resources */,
 				3B7394572EE25CB900DF2DCF /* REAMDE.md in Resources */,
 			);
