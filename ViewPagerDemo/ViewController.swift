@@ -1,6 +1,6 @@
-#if canImport(UIKit)
 import UIKit
 import SnapKit
+import MJRefresh
 
 final class ViewController: UIViewController {
 
@@ -427,4 +427,3 @@ struct DemoFeedItem: Hashable {
     let title: String
     let subtitle: String
 }
-#endif
