@@ -5,7 +5,7 @@ import SnapKit
 
 /// 页面状态提供者
 ///
-/// 从 `PageableViewModel` 读取状态，决定展示状态页还是数据页
+/// 从 `AnyDemoPageViewModel` 读取状态，决定展示状态页还是数据页
 final class DemoPageStateProvider: PagerPagePresentationProviding {
 
     private weak var dataStore: DemoDataStore?
@@ -31,11 +31,9 @@ final class DemoPageStateProvider: PagerPagePresentationProviding {
             return nil
         }
 
-        // 根据 ViewModel 的 viewState 决定展示什么
         switch viewModel.viewState {
         case .loaded:
-            // 返回 nil 表示展示数据列表
-            return nil
+            return nil  // 展示数据列表
         case .idle, .loading, .empty, .failed:
             guard let cell = pageContainer.dequeueReusableCell(
                 withReuseIdentifier: DemoPageStateCell.reuseIdentifier,
@@ -44,7 +42,6 @@ final class DemoPageStateProvider: PagerPagePresentationProviding {
                 return nil
             }
             cell.render(state: viewModel.viewState)
-            // 失败态点击重试 → 直接驱动 ViewModel.retry()
             cell.onRetry = { [weak viewModel] in
                 viewModel?.retry()
             }

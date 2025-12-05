@@ -35,16 +35,16 @@ struct DemoCategoryMeta {
     }
 }
 
-/// Feed 数据项
-struct DemoFeedItem: Hashable {
+/// 列表布局 Item（包含标题、副标题）
+struct DemoListItem: Hashable {
     let id = UUID()
     let title: String
     let subtitle: String
-    let imageColor: UIColor  // 模拟图片的颜色
-    
-    init(title: String, subtitle: String, imageColor: UIColor = .systemGray4) {
-        self.title = title
-        self.subtitle = subtitle
-        self.imageColor = imageColor
-    }
+}
+
+/// 网格布局 Item（包含标题、颜色，复用于 3/4 列）
+struct DemoGridItem: Hashable {
+    let id = UUID()
+    let title: String
+    let imageColor: UIColor
 }

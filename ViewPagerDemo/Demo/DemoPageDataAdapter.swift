@@ -5,12 +5,12 @@ import SnapKit
 
 /// 页面数据适配器
 ///
-/// 从 `PageableViewModel` 读取数据列表
+/// 从 `AnyDemoPageViewModel` 读取数据列表，支持不同 Item 类型
 final class DemoPageDataAdapter: PagerPageDataRendering {
 
     private weak var dataStore: DemoDataStore?
     /// 外部点击回调（可在 VC 内设置）
-    var onItemTapped: ((DemoFeedItem?, PageModel, IndexPath) -> Void)?
+    var onItemTapped: ((Any?, PageModel, IndexPath) -> Void)?
 
     init(dataStore: DemoDataStore) {
         self.dataStore = dataStore
@@ -99,11 +99,7 @@ final class DemoPageDataAdapter: PagerPageDataRendering {
         _ pagerView: MultiCategoryPagerView,
         itemsFor page: PageModel
     ) -> [PageItemModel] {
-        guard let viewModel = dataStore?.viewModel(for: page.pageId) else {
-            return []
-        }
-        // 从 ViewModel 读取 items，转换为 PageItemModel
-        return viewModel.items.map { PageItemModel(id: $0.id, payload: $0) }
+        dataStore?.viewModel(for: page.pageId)?.items ?? []
     }
 
     func pagerView(
@@ -125,7 +121,8 @@ final class DemoPageDataAdapter: PagerPageDataRendering {
             ) as? DemoFeedCell else {
                 return UICollectionViewCell()
             }
-            cell.configure(with: item.payload as? DemoFeedItem)
+            let feed = item.payload as? DemoListItem
+            cell.configure(with: feed)
             return cell
 
         case .grid3, .grid4:
@@ -135,7 +132,8 @@ final class DemoPageDataAdapter: PagerPageDataRendering {
             ) as? DemoGridCell else {
                 return UICollectionViewCell()
             }
-            cell.configure(with: item.payload as? DemoFeedItem)
+            let feed = item.payload as? DemoGridItem
+            cell.configure(with: feed)
             return cell
         }
     }
@@ -146,9 +144,7 @@ final class DemoPageDataAdapter: PagerPageDataRendering {
         at indexPath: IndexPath,
         page: PageModel
     ) {
-        let feedItem = item.payload as? DemoFeedItem
-        // 回调给外部（如 VC）处理点击逻辑
-        onItemTapped?(feedItem, page, indexPath)
+        onItemTapped?(item.payload, page, indexPath)
     }
 }
 
@@ -194,7 +190,7 @@ final class DemoFeedCell: UICollectionViewCell {
         }
     }
 
-    func configure(with item: DemoFeedItem?) {
+    func configure(with item: DemoListItem?) {
         titleLabel.text = item?.title ?? "未命名 Item"
         subtitleLabel.text = item?.subtitle ?? ""
     }
@@ -247,7 +243,7 @@ final class DemoGridCell: UICollectionViewCell {
         }
     }
 
-    func configure(with item: DemoFeedItem?) {
+    func configure(with item: DemoGridItem?) {
         titleLabel.text = item?.title ?? "未命名"
         imageView.backgroundColor = item?.imageColor ?? .systemGray4
     }

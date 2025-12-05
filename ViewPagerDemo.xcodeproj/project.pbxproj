@@ -33,6 +33,8 @@
 		3B7394762EE329A200DF2DCF /* PageableProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394712EE329A200DF2DCF /* PageableProtocols.swift */; };
 		3B7394772EE329A200DF2DCF /* PageableModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394702EE329A200DF2DCF /* PageableModels.swift */; };
 		3B7394782EE329A200DF2DCF /* pageable.md in Resources */ = {isa = PBXBuildFile; fileRef = 3B7394732EE329A200DF2DCF /* pageable.md */; };
+		3B73947B2EE33AFB00DF2DCF /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B73947A2EE33AFB00DF2DCF /* PromiseKit */; };
+		3B73947D2EE33D4600DF2DCF /* PageableViewModelPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B73947C2EE33D4600DF2DCF /* PageableViewModelPromise.swift */; };
 		3BEAFEF12EE1DC4C0019E77E /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF02EE1DC4C0019E77E /* LookinServer */; };
 		3BEAFEF42EE1DC5C0019E77E /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF32EE1DC5C0019E77E /* SnapKit */; };
 /* End PBXBuildFile section */
@@ -64,6 +66,7 @@
 		3B7394712EE329A200DF2DCF /* PageableProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableProtocols.swift; sourceTree = "<group>"; };
 		3B7394722EE329A200DF2DCF /* PageableViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableViewModel.swift; sourceTree = "<group>"; };
 		3B7394732EE329A200DF2DCF /* pageable.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = pageable.md; sourceTree = "<group>"; };
+		3B73947C2EE33D4600DF2DCF /* PageableViewModelPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableViewModelPromise.swift; sourceTree = "<group>"; };
 		3BEAFED72EE1DBEA0019E77E /* ViewPagerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ViewPagerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7056E61ABEAE327E41EAEDA2 /* Pods_ViewPagerDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ViewPagerDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFBF1E3CE1A21F4757F2EC9A /* Pods-ViewPagerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ViewPagerDemo.release.xcconfig"; path = "Target Support Files/Pods-ViewPagerDemo/Pods-ViewPagerDemo.release.xcconfig"; sourceTree = "<group>"; };
@@ -76,6 +79,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BEAFEF12EE1DC4C0019E77E /* LookinServer in Frameworks */,
+				3B73947B2EE33AFB00DF2DCF /* PromiseKit in Frameworks */,
 				3BEAFEF42EE1DC5C0019E77E /* SnapKit in Frameworks */,
 				284B94675FD84074358D6524 /* Pods_ViewPagerDemo.framework in Frameworks */,
 			);
@@ -144,6 +148,7 @@
 				3B7394702EE329A200DF2DCF /* PageableModels.swift */,
 				3B7394712EE329A200DF2DCF /* PageableProtocols.swift */,
 				3B7394722EE329A200DF2DCF /* PageableViewModel.swift */,
+				3B73947C2EE33D4600DF2DCF /* PageableViewModelPromise.swift */,
 				3B7394732EE329A200DF2DCF /* pageable.md */,
 			);
 			path = Pageable;
@@ -205,6 +210,7 @@
 			packageProductDependencies = (
 				3BEAFEF02EE1DC4C0019E77E /* LookinServer */,
 				3BEAFEF32EE1DC5C0019E77E /* SnapKit */,
+				3B73947A2EE33AFB00DF2DCF /* PromiseKit */,
 			);
 			productName = ViewPagerDemo;
 			productReference = 3BEAFED72EE1DBEA0019E77E /* ViewPagerDemo.app */;
@@ -237,6 +243,7 @@
 			packageReferences = (
 				3BEAFEEF2EE1DC4B0019E77E /* XCLocalSwiftPackageReference "../../Documents/iOS4app/LookinServer" */,
 				3BEAFEF22EE1DC5C0019E77E /* XCLocalSwiftPackageReference "../../Documents/iOS4app/SnapKit" */,
+				3B7394792EE33AFB00DF2DCF /* XCRemoteSwiftPackageReference "PromiseKit" */,
 			);
 			productRefGroup = 3BEAFED82EE1DBEA0019E77E /* Products */;
 			projectDirPath = "";
@@ -315,6 +322,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B73947D2EE33D4600DF2DCF /* PageableViewModelPromise.swift in Sources */,
 				3B7394582EE25CB900DF2DCF /* PagerMenuDefaultCell.swift in Sources */,
 				3B7394592EE25CB900DF2DCF /* PagerPageDataCell.swift in Sources */,
 				3B73945A2EE25CB900DF2DCF /* MultiCategoryPagerView.swift in Sources */,
@@ -581,7 +589,23 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		3B7394792EE33AFB00DF2DCF /* XCRemoteSwiftPackageReference "PromiseKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mxcl/PromiseKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		3B73947A2EE33AFB00DF2DCF /* PromiseKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B7394792EE33AFB00DF2DCF /* XCRemoteSwiftPackageReference "PromiseKit" */;
+			productName = PromiseKit;
+		};
 		3BEAFEF02EE1DC4C0019E77E /* LookinServer */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LookinServer;

@@ -38,11 +38,17 @@ final class ViewController: UIViewController {
         pagerView.loadMoreProvider = loadMoreProvider
         pagerView.pageExposureHandler = self
         pagerView.itemExposureHandler = self
-        dataAdapter.onItemTapped = { [weak self] feedItem, page, indexPath in
-            guard let _ = self else { return }
-            let title = feedItem?.title ?? "Unknown"
+        dataAdapter.onItemTapped = { [weak self] payload, page, indexPath in
+            guard let self else { return }
+            let title: String
+            if let item = payload as? DemoListItem {
+                title = item.title
+            } else if let item = payload as? DemoGridItem {
+                title = item.title
+            } else {
+                title = "Unknown"
+            }
             print("✅ [Item 点击] \(title) at row \(indexPath.item) in page \(page.pageId)")
-            // TODO: 在这里对接跳转、上报或弹窗等业务逻辑
         }
         pagerView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(12)
@@ -69,8 +75,8 @@ final class ViewController: UIViewController {
             guard let viewModel = dataStore.viewModel(for: pageId) else { continue }
 
             // 订阅视图状态变化 → 刷新 Pager
-            viewModel.$viewState
-                .dropFirst()  // 跳过初始值
+            viewModel.viewStatePublisher
+                .dropFirst()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] state in
                     self?.handleStateChange(pageId: pageId, state: state)
@@ -78,7 +84,7 @@ final class ViewController: UIViewController {
                 .store(in: &cancellables)
 
             // 订阅数据变化 → 刷新数据列表
-            viewModel.$items
+            viewModel.itemsPublisher
                 .dropFirst()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] _ in
@@ -87,7 +93,7 @@ final class ViewController: UIViewController {
                 .store(in: &cancellables)
 
             // 订阅加载更多状态 → 更新 footer
-            viewModel.$loadMoreState
+            viewModel.loadMoreStatePublisher
                 .dropFirst()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] _ in
@@ -155,7 +161,14 @@ extension ViewController: PagerItemExposureHandling {
         at indexPath: IndexPath,
         page: PageModel
     ) {
-        let feedItem = item.payload as? DemoFeedItem
-        print("👁 [Item 曝光] \(feedItem?.title ?? "Unknown") (row: \(indexPath.item)) in page \(page.pageId)")
+        let title: String
+        if let feed = item.payload as? DemoListItem {
+            title = feed.title
+        } else if let feed = item.payload as? DemoGridItem {
+            title = feed.title
+        } else {
+            title = "Unknown"
+        }
+        print("👁 [Item 曝光] \(title) (row: \(indexPath.item)) in page \(page.pageId)")
     }
 }

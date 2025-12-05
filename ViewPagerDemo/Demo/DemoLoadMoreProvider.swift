@@ -5,7 +5,7 @@ import MJRefresh
 
 /// 加载更多提供者
 ///
-/// 从 `PageableViewModel` 读取状态，创建和管理 MJRefresh footer
+/// 从 `AnyDemoPageViewModel` 读取状态，创建和管理 MJRefresh footer
 final class DemoLoadMoreProvider: PagerLoadMoreProviding {
 
     private weak var dataStore: DemoDataStore?
