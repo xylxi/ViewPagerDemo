@@ -1,20 +1,27 @@
+import Combine
 import UIKit
 import SnapKit
 
 final class ViewController: UIViewController {
 
+    // MARK: - Properties
+
+    private let dataStore = DemoDataStore()
     private lazy var menuProvider = DemoMenuProvider()
     private lazy var stateProvider = DemoPageStateProvider(dataStore: dataStore)
     private lazy var dataAdapter = DemoPageDataAdapter(dataStore: dataStore)
-    private lazy var loadMoreProvider = DemoLoadMoreProvider(dataStore: dataStore) { [weak self] page in
-        self?.loadMore(for: page)
-    }
-    private lazy var pagerView = MultiCategoryPagerView(menuProvider: menuProvider,
-                                                        pagePresentationProvider: stateProvider,
-                                                        pageDataRenderer: dataAdapter)
+    private lazy var loadMoreProvider = DemoLoadMoreProvider(dataStore: dataStore)
 
-    /// 外部数据存储，组件不感知 state/items
-    private let dataStore = DemoDataStore()
+    private lazy var pagerView = MultiCategoryPagerView(
+        menuProvider: menuProvider,
+        pagePresentationProvider: stateProvider,
+        pageDataRenderer: dataAdapter
+    )
+
+    /// Combine 订阅存储
+    private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,6 +29,8 @@ final class ViewController: UIViewController {
         setupPager()
         loadInitialData()
     }
+
+    // MARK: - Setup
 
     private func setupPager() {
         view.addSubview(pagerView)
@@ -39,62 +48,81 @@ final class ViewController: UIViewController {
     private func loadInitialData() {
         let snapshots = dataStore.makeInitialSnapshots()
         pagerView.apply(sections: snapshots, animated: false)
-        simulateNetworkLoading()
+
+        // 为每个 page 的 ViewModel 绑定状态订阅
+        bindViewModels()
+
+        // 触发首次加载
+        triggerInitialLoads()
     }
 
-    private func simulateNetworkLoading() {
-        for (index, pageId) in dataStore.allPageIds.enumerated() {
-            let delay = DispatchTime.now() + .seconds(2)
-            DispatchQueue.main.asyncAfter(deadline: delay) { [weak self] in
-                guard let self else { return }
-                switch index {
-                case 1:
-                    self.dataStore.update(pageId: pageId, state: .empty, items: [])
-                case 2:
-                    self.dataStore.update(pageId: pageId, state: .failed(message: "网络异常，请稍后重试"), items: [])
-                default:
-                    let items = self.dataStore.makeItems(for: pageId)
-                    self.dataStore.update(pageId: pageId, state: .loaded, items: items)
+    // MARK: - ViewModel Binding
+
+    private func bindViewModels() {
+        for pageId in dataStore.allPageIds {
+            guard let viewModel = dataStore.viewModel(for: pageId) else { continue }
+
+            // 订阅视图状态变化 → 刷新 Pager
+            viewModel.$viewState
+                .dropFirst()  // 跳过初始值
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] state in
+                    self?.handleStateChange(pageId: pageId, state: state)
                 }
-                // 通知 pagerView 刷新（触发 cell 重新配置）
-                self.pagerView.update(pageId: pageId) { _ in }
-            }
+                .store(in: &cancellables)
+
+            // 订阅数据变化 → 刷新数据列表
+            viewModel.$items
+                .dropFirst()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    self?.handleItemsUpdated(pageId: pageId)
+                }
+                .store(in: &cancellables)
+
+            // 订阅加载更多状态 → 更新 footer
+            viewModel.$loadMoreState
+                .dropFirst()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    self?.handleLoadMoreStateChanged(pageId: pageId)
+                }
+                .store(in: &cancellables)
         }
     }
-    
-    private func loadMore(for page: PageModel) {
-        let pageId = page.pageId
-        
-        // MJRefresh 触发回调时已自动进入 refreshing 状态，直接进行网络请求
-        // 模拟网络请求
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-            guard let self else { return }
-            
-            // 获取更多数据
-            let newItems = self.dataStore.makeMoreItems(for: pageId)
-            
-            // 模拟：加载 3 次后没有更多数据
-            let currentPage = self.dataStore.pageData(for: pageId)?.currentPage ?? 0
-            let hasMore = currentPage < 2
-            
-            // 更新数据
-            self.dataStore.appendItems(pageId: pageId, newItems: newItems, hasMore: hasMore)
-            
-            // 刷新数据列表（保持滚动位置，避免回弹）
-            self.pagerView.reloadPageData(pageId: pageId)
-            
-            // 结束加载，更新 footer 状态
-            self.loadMoreProvider.endRefreshing(for: pageId, hasMore: hasMore)
-            
-            print("Loaded more items for \(pageId), hasMore: \(hasMore)")
+
+    private func triggerInitialLoads() {
+        for pageId in dataStore.allPageIds {
+            dataStore.viewModel(for: pageId)?.loadInitial()
         }
+    }
+
+    // MARK: - State Handlers
+
+    private func handleStateChange(pageId: String, state: ViewState) {
+        print("📍 [\(pageId)] State changed: \(state)")
+        // 触发 Pager 刷新该 page 的展示
+        pagerView.update(pageId: pageId, animated: false) { _ in }
+    }
+
+    private func handleItemsUpdated(pageId: String) {
+        // 使用 reloadPageData 保持滚动位置
+        pagerView.reloadPageData(pageId: pageId)
+    }
+
+    private func handleLoadMoreStateChanged(pageId: String) {
+        loadMoreProvider.endRefreshing(for: pageId)
     }
 }
 
 // MARK: - PagerMenuSelectionHandling
 
 extension ViewController: PagerMenuSelectionHandling {
-    func pagerView(_ pagerView: MultiCategoryPagerView, didSelect page: PageModel, at index: Int) {
+    func pagerView(
+        _ pagerView: MultiCategoryPagerView,
+        didSelect page: PageModel,
+        at index: Int
+    ) {
         print("📌 Selected page \(page.pageId) at index \(index)")
     }
 }
@@ -102,7 +130,11 @@ extension ViewController: PagerMenuSelectionHandling {
 // MARK: - PagerPageExposureHandling
 
 extension ViewController: PagerPageExposureHandling {
-    func pagerView(_ pagerView: MultiCategoryPagerView, didExposePage page: PageModel, at index: Int) {
+    func pagerView(
+        _ pagerView: MultiCategoryPagerView,
+        didExposePage page: PageModel,
+        at index: Int
+    ) {
         let category = dataStore.category(for: page.pageId)
         print("📊 [Page 曝光] \(category?.title ?? "Unknown") (index: \(index))")
     }
@@ -111,7 +143,12 @@ extension ViewController: PagerPageExposureHandling {
 // MARK: - PagerItemExposureHandling
 
 extension ViewController: PagerItemExposureHandling {
-    func pagerView(_ pagerView: MultiCategoryPagerView, didExposeItem item: PageItemModel, at indexPath: IndexPath, page: PageModel) {
+    func pagerView(
+        _ pagerView: MultiCategoryPagerView,
+        didExposeItem item: PageItemModel,
+        at indexPath: IndexPath,
+        page: PageModel
+    ) {
         let feedItem = item.payload as? DemoFeedItem
         print("👁 [Item 曝光] \(feedItem?.title ?? "Unknown") (row: \(indexPath.item)) in page \(page.pageId)")
     }

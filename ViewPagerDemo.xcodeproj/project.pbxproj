@@ -29,6 +29,10 @@
 		3B73946C2EE31ACC00DF2DCF /* DemoPageStateProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */; };
 		3B73946D2EE31ACC00DF2DCF /* DemoDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394612EE31ACC00DF2DCF /* DemoDataStore.swift */; };
 		3B73946F2EE323A900DF2DCF /* swift-style-guide.md in Resources */ = {isa = PBXBuildFile; fileRef = 3B73946E2EE323A900DF2DCF /* swift-style-guide.md */; };
+		3B7394752EE329A200DF2DCF /* PageableViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394722EE329A200DF2DCF /* PageableViewModel.swift */; };
+		3B7394762EE329A200DF2DCF /* PageableProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394712EE329A200DF2DCF /* PageableProtocols.swift */; };
+		3B7394772EE329A200DF2DCF /* PageableModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394702EE329A200DF2DCF /* PageableModels.swift */; };
+		3B7394782EE329A200DF2DCF /* pageable.md in Resources */ = {isa = PBXBuildFile; fileRef = 3B7394732EE329A200DF2DCF /* pageable.md */; };
 		3BEAFEF12EE1DC4C0019E77E /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF02EE1DC4C0019E77E /* LookinServer */; };
 		3BEAFEF42EE1DC5C0019E77E /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF32EE1DC5C0019E77E /* SnapKit */; };
 /* End PBXBuildFile section */
@@ -56,6 +60,10 @@
 		3B7394652EE31ACC00DF2DCF /* DemoPageDataAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoPageDataAdapter.swift; sourceTree = "<group>"; };
 		3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoPageStateProvider.swift; sourceTree = "<group>"; };
 		3B73946E2EE323A900DF2DCF /* swift-style-guide.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "swift-style-guide.md"; sourceTree = "<group>"; };
+		3B7394702EE329A200DF2DCF /* PageableModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableModels.swift; sourceTree = "<group>"; };
+		3B7394712EE329A200DF2DCF /* PageableProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableProtocols.swift; sourceTree = "<group>"; };
+		3B7394722EE329A200DF2DCF /* PageableViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableViewModel.swift; sourceTree = "<group>"; };
+		3B7394732EE329A200DF2DCF /* pageable.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = pageable.md; sourceTree = "<group>"; };
 		3BEAFED72EE1DBEA0019E77E /* ViewPagerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ViewPagerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7056E61ABEAE327E41EAEDA2 /* Pods_ViewPagerDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ViewPagerDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFBF1E3CE1A21F4757F2EC9A /* Pods-ViewPagerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ViewPagerDemo.release.xcconfig"; path = "Target Support Files/Pods-ViewPagerDemo/Pods-ViewPagerDemo.release.xcconfig"; sourceTree = "<group>"; };
@@ -102,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				3B7394672EE31ACC00DF2DCF /* Demo */,
+				3B7394742EE329A200DF2DCF /* Pageable */,
 				3B7394462EE25CB900DF2DCF /* Pager */,
 				3B7394472EE25CB900DF2DCF /* AppDelegate.swift */,
 				3B7394502EE25CB900DF2DCF /* ViewController.swift */,
@@ -127,6 +136,17 @@
 				3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */,
 			);
 			path = Demo;
+			sourceTree = "<group>";
+		};
+		3B7394742EE329A200DF2DCF /* Pageable */ = {
+			isa = PBXGroup;
+			children = (
+				3B7394702EE329A200DF2DCF /* PageableModels.swift */,
+				3B7394712EE329A200DF2DCF /* PageableProtocols.swift */,
+				3B7394722EE329A200DF2DCF /* PageableViewModel.swift */,
+				3B7394732EE329A200DF2DCF /* pageable.md */,
+			);
+			path = Pageable;
 			sourceTree = "<group>";
 		};
 		3BEAFECE2EE1DBEA0019E77E = {
@@ -235,6 +255,7 @@
 				3B7394522EE25CB900DF2DCF /* README.md in Resources */,
 				3B7394532EE25CB900DF2DCF /* Assets.xcassets in Resources */,
 				3B7394552EE25CB900DF2DCF /* LaunchScreen.storyboard in Resources */,
+				3B7394782EE329A200DF2DCF /* pageable.md in Resources */,
 				3B73946F2EE323A900DF2DCF /* swift-style-guide.md in Resources */,
 				3B7394562EE25CB900DF2DCF /* Main.storyboard in Resources */,
 				3B7394572EE25CB900DF2DCF /* REAMDE.md in Resources */,
@@ -305,6 +326,9 @@
 				3B73946B2EE31ACC00DF2DCF /* DemoMenuProvider.swift in Sources */,
 				3B73946C2EE31ACC00DF2DCF /* DemoPageStateProvider.swift in Sources */,
 				3B73946D2EE31ACC00DF2DCF /* DemoDataStore.swift in Sources */,
+				3B7394752EE329A200DF2DCF /* PageableViewModel.swift in Sources */,
+				3B7394762EE329A200DF2DCF /* PageableProtocols.swift in Sources */,
+				3B7394772EE329A200DF2DCF /* PageableModels.swift in Sources */,
 				3B73945D2EE25CB900DF2DCF /* PageScrollCache.swift in Sources */,
 				3B73945E2EE25CB900DF2DCF /* AppDelegate.swift in Sources */,
 				3B73945F2EE25CB900DF2DCF /* SceneDelegate.swift in Sources */,

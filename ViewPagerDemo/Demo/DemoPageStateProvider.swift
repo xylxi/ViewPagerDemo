@@ -3,30 +3,47 @@ import SnapKit
 
 // MARK: - Demo Page State Provider
 
+/// 页面状态提供者
+///
+/// 从 `PageableViewModel` 读取状态，决定展示状态页还是数据页
 final class DemoPageStateProvider: PagerPagePresentationProviding {
-    
+
     private weak var dataStore: DemoDataStore?
-    
+
     init(dataStore: DemoDataStore) {
         self.dataStore = dataStore
     }
-    
+
     func registerPageStateCells(in collectionView: UICollectionView) {
-        collectionView.register(DemoPageStateCell.self, forCellWithReuseIdentifier: DemoPageStateCell.reuseIdentifier)
+        collectionView.register(
+            DemoPageStateCell.self,
+            forCellWithReuseIdentifier: DemoPageStateCell.reuseIdentifier
+        )
     }
 
-    func pagerView(_ pagerView: MultiCategoryPagerView, pageContainer: UICollectionView, cellFor page: PageModel, at indexPath: IndexPath) -> UICollectionViewCell? {
-        guard let pageData = dataStore?.pageData(for: page.pageId) else { return nil }
-        
-        switch pageData.state {
+    func pagerView(
+        _ pagerView: MultiCategoryPagerView,
+        pageContainer: UICollectionView,
+        cellFor page: PageModel,
+        at indexPath: IndexPath
+    ) -> UICollectionViewCell? {
+        guard let viewModel = dataStore?.viewModel(for: page.pageId) else {
+            return nil
+        }
+
+        // 根据 ViewModel 的 viewState 决定展示什么
+        switch viewModel.viewState {
         case .loaded:
             // 返回 nil 表示展示数据列表
             return nil
-        case .loading, .empty, .failed:
-            guard let cell = pageContainer.dequeueReusableCell(withReuseIdentifier: DemoPageStateCell.reuseIdentifier, for: indexPath) as? DemoPageStateCell else {
+        case .idle, .loading, .empty, .failed:
+            guard let cell = pageContainer.dequeueReusableCell(
+                withReuseIdentifier: DemoPageStateCell.reuseIdentifier,
+                for: indexPath
+            ) as? DemoPageStateCell else {
                 return nil
             }
-            cell.render(state: pageData.state)
+            cell.render(state: viewModel.viewState)
             return cell
         }
     }
@@ -34,6 +51,9 @@ final class DemoPageStateProvider: PagerPagePresentationProviding {
 
 // MARK: - Demo Page State Cell
 
+/// 页面状态 Cell
+///
+/// 展示 loading / empty / failed 状态
 final class DemoPageStateCell: UICollectionViewCell {
     static let reuseIdentifier = "DemoPageStateCell"
 
@@ -41,6 +61,10 @@ final class DemoPageStateCell: UICollectionViewCell {
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
+    private let retryButton = UIButton(type: .system)
+
+    /// 重试回调
+    var onRetry: (() -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -60,6 +84,13 @@ final class DemoPageStateCell: UICollectionViewCell {
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         subtitleLabel.font = UIFont.systemFont(ofSize: 14)
         subtitleLabel.textColor = .secondaryLabel
+        subtitleLabel.numberOfLines = 0
+        subtitleLabel.textAlignment = .center
+
+        retryButton.setTitle("点击重试", for: .normal)
+        retryButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
+        retryButton.isHidden = true
 
         contentView.addSubview(stackView)
         stackView.snp.makeConstraints { make in
@@ -71,30 +102,44 @@ final class DemoPageStateCell: UICollectionViewCell {
         stackView.addArrangedSubview(activityIndicator)
         stackView.addArrangedSubview(titleLabel)
         stackView.addArrangedSubview(subtitleLabel)
+        stackView.addArrangedSubview(retryButton)
+
+        stackView.setCustomSpacing(16, after: subtitleLabel)
     }
 
-    func render(state: DemoDataStore.PageState) {
+    @objc private func retryTapped() {
+        onRetry?()
+    }
+
+    func render(state: ViewState) {
         switch state {
-        case .loading:
+        case .idle, .loading:
             activityIndicator.isHidden = false
             activityIndicator.startAnimating()
             titleLabel.text = "加载中..."
             subtitleLabel.text = "正在获取数据，请稍候"
+            retryButton.isHidden = true
+
         case .empty:
             activityIndicator.stopAnimating()
             activityIndicator.isHidden = true
             titleLabel.text = "暂无内容"
             subtitleLabel.text = "可以稍后再试或更换分类"
-        case .failed(let message):
+            retryButton.isHidden = true
+
+        case .failed(let error):
             activityIndicator.stopAnimating()
             activityIndicator.isHidden = true
             titleLabel.text = "加载失败"
-            subtitleLabel.text = message
+            subtitleLabel.text = error.message
+            retryButton.isHidden = false
+
         case .loaded:
             activityIndicator.stopAnimating()
             activityIndicator.isHidden = true
             titleLabel.text = nil
             subtitleLabel.text = nil
+            retryButton.isHidden = true
         }
     }
 }
