@@ -135,6 +135,7 @@ public final class MultiCategoryPagerView: UIView {
     // 数据驱动
     func apply(sections: [PagerSectionSnapshot], animated: Bool)
     func update(pageId: AnyHashable, animated: Bool, transform: (inout PageModel) -> Void)
+    func reloadPageData(pageId: AnyHashable)  // 刷新数据，保持滚动位置
     func selectPage(at index: Int, animated: Bool)
 }
 ```
@@ -165,7 +166,7 @@ public final class MultiCategoryPagerView: UIView {
    ↓
 2. 外部执行加载逻辑，更新 DataStore (hasMore / items)
    ↓
-3. pagerView.update(pageId:) 刷新列表数据
+3. pagerView.reloadPageData(pageId:) 刷新数据（保持滚动位置）
    ↓
 4. 外部通过缓存的 footer 更新状态
    ├─ hasMore = true  → footer.endRefreshing()

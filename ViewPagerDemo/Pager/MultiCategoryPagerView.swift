@@ -71,6 +71,22 @@ public final class MultiCategoryPagerView: UIView {
         }
         pageDataSource.apply(snapshot, animatingDifferences: animated)
     }
+    
+    /// 刷新指定 page 的数据列表，保持滚动位置（用于加载更多等场景）
+    public func reloadPageData(pageId: AnyHashable) {
+        // 找到对应的 cell 并刷新数据
+        for cell in pageCollectionView.visibleCells {
+            if let dataCell = cell as? PagerPageDataCell {
+                // 通过 indexPath 获取对应的 page
+                if let indexPath = pageCollectionView.indexPath(for: cell),
+                   indexPath.item < flattenedPages.count,
+                   flattenedPages[indexPath.item].pageId == pageId {
+                    dataCell.reloadData()
+                    return
+                }
+            }
+        }
+    }
 
     public func selectPage(at index: Int, animated: Bool) {
         guard index >= 0, index < flattenedPages.count else { return }

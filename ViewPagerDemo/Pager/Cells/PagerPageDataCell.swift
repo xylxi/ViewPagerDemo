@@ -146,6 +146,20 @@ final class PagerPageDataCell: UICollectionViewCell, UICollectionViewDelegate {
         }
 #endif
     }
+    
+    // MARK: - Public Reload (保持滚动位置)
+    
+    /// 重新加载数据，保持当前滚动位置（用于加载更多等场景）
+    func reloadData() {
+        guard let pagerView, let adapter, let currentPage else { return }
+        
+        // 获取最新数据
+        let items = adapter.pagerView(pagerView, itemsFor: currentPage)
+        currentItems = items
+        
+        // 增量更新，不改变滚动位置
+        apply(items: items, animated: false, completion: nil)
+    }
 
     // MARK: - UICollectionViewDelegate
 

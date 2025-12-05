@@ -79,8 +79,8 @@ final class ViewController: UIViewController {
             // 更新数据
             self.dataStore.appendItems(pageId: pageId, newItems: newItems, hasMore: hasMore)
             
-            // 刷新 pagerView
-            self.pagerView.update(pageId: pageId, animated: false) { _ in }
+            // 刷新数据列表（保持滚动位置，避免回弹）
+            self.pagerView.reloadPageData(pageId: pageId)
             
             // 结束加载，更新 footer 状态
             self.loadMoreProvider.endRefreshing(for: pageId, hasMore: hasMore)
