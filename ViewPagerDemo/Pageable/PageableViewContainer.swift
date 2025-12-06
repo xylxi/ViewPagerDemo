@@ -174,6 +174,16 @@ import MJRefresh
 // │      eventTracker: MyTracker()                                              │
 // │  )                                                                          │
 // │                                                                             │
+// │  // 7. 监听滚动事件                                                           │
+// │  let container = PageableViewContainer(                                     │
+// │      viewModel: vm,                                                         │
+// │      cellConfigurator: config                                               │
+// │  )                                                                          │
+// │  container.scrollHandler = { scrollView in                                 │
+// │      // 处理滚动事件（如导航栏隐藏、下拉放大头图等）                              │
+// │      print("Scrolled to: \(scrollView.contentOffset.y)")                   │
+// │  }                                                                          │
+// │                                                                             │
 // └─────────────────────────────────────────────────────────────────────────────┘
 
 /// 通用分页视图容器
@@ -232,6 +242,9 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView, UIColl
 
     /// 事件追踪器（可选，用于埋点上报）
     public var eventTracker: EventTracker?
+
+    /// 滚动事件回调（可选，用于外部监听滚动）
+    public var scrollHandler: ((UIScrollView) -> Void)?
 
     // MARK: - Private Properties
 
@@ -587,6 +600,12 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView, UIColl
 
         // 事件追踪：曝光
         eventTracker?.onEvent(.itemExposure(item: item, index: indexPath.item))
+    }
+
+    // MARK: - UIScrollViewDelegate
+
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        scrollHandler?(scrollView)
     }
 }
 
