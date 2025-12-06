@@ -53,7 +53,7 @@ import Foundation
 /// }
 /// ```
 @MainActor
-public final class PageableViewModelPromise<Item, Cursor>: ObservableObject {
+open class PageableViewModelPromise<Item, Cursor>: ObservableObject {
 
     // MARK: - Published State
 
@@ -79,16 +79,16 @@ public final class PageableViewModelPromise<Item, Cursor>: ObservableObject {
         nextCursor != nil
     }
 
-    // MARK: - Private Properties
+    // MARK: - Internal Properties
 
     /// 初始游标（用于重置）
-    private let initialCursor: Cursor
+    internal let initialCursor: Cursor
 
     /// 分页数据获取闭包
-    private let fetchPage: (Cursor) -> AnyPublisher<PageResult<Item, Cursor>, Error>
+    internal let fetchPage: (Cursor) -> AnyPublisher<PageResult<Item, Cursor>, Error>
 
     /// 当前加载订阅（用于取消）
-    private var loadCancellable: AnyCancellable?
+    internal var loadCancellable: AnyCancellable?
 
     // MARK: - Initialization
 
@@ -173,15 +173,19 @@ public final class PageableViewModelPromise<Item, Cursor>: ObservableObject {
         performLoad(cursor: cursor, isLoadMore: true)
     }
 
-    // MARK: - Private Methods
+    // MARK: - Overridable Methods
 
     /// 是否可以加载更多
-    private var canLoadMore: Bool {
+    ///
+    /// 子类可以重写此属性来自定义加载更多的条件
+    open var canLoadMore: Bool {
         viewState == .loaded && hasMore && loadMoreState != .loading
     }
 
     /// 重置所有状态
-    private func reset() {
+    ///
+    /// 子类可以重写此方法来添加自定义清理逻辑
+    open func reset() {
         loadCancellable?.cancel()
         items = []
         currentCursor = initialCursor
@@ -190,7 +194,9 @@ public final class PageableViewModelPromise<Item, Cursor>: ObservableObject {
     }
 
     /// 执行加载
-    private func performLoad(cursor: Cursor, isLoadMore: Bool) {
+    ///
+    /// 子类可以重写此方法来自定义加载逻辑（如添加日志、埋点等）
+    open func performLoad(cursor: Cursor, isLoadMore: Bool) {
         loadCancellable = fetchPage(cursor)
             .receive(on: DispatchQueue.main)
             .sink(
@@ -210,7 +216,9 @@ public final class PageableViewModelPromise<Item, Cursor>: ObservableObject {
     }
 
     /// 处理加载成功
-    private func handleSuccess(
+    ///
+    /// 子类可以重写此方法来自定义成功处理逻辑（如数据转换、缓存等）
+    open func handleSuccess(
         result: PageResult<Item, Cursor>,
         cursor: Cursor,
         isLoadMore: Bool
@@ -242,7 +250,9 @@ public final class PageableViewModelPromise<Item, Cursor>: ObservableObject {
     }
 
     /// 处理加载失败
-    private func handleFailure(error: Error, isLoadMore: Bool) {
+    ///
+    /// 子类可以重写此方法来自定义失败处理逻辑（如错误上报、重试策略等）
+    open func handleFailure(error: Error, isLoadMore: Bool) {
         let stateError = ViewStateError(error)
 
         if isLoadMore {
