@@ -8,6 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		284B94675FD84074358D6524 /* Pods_ViewPagerDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7056E61ABEAE327E41EAEDA2 /* Pods_ViewPagerDemo.framework */; };
+		3B34256F2EE3B9CF00AA2A84 /* NewsItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3425652EE3B9CF00AA2A84 /* NewsItem.swift */; };
+		3B3425702EE3B9CF00AA2A84 /* NewsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3425682EE3B9CF00AA2A84 /* NewsService.swift */; };
+		3B3425712EE3B9CF00AA2A84 /* NewsStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B34256B2EE3B9CF00AA2A84 /* NewsStateView.swift */; };
+		3B3425722EE3B9CF00AA2A84 /* NewsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B34256A2EE3B9CF00AA2A84 /* NewsCell.swift */; };
+		3B3425732EE3B9CF00AA2A84 /* PageableDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3425672EE3B9CF00AA2A84 /* PageableDemoViewController.swift */; };
+		3B3425742EE3B9CF00AA2A84 /* NewsDemoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B34256D2EE3B9CF00AA2A84 /* NewsDemoViewModel.swift */; };
+		3B3425762EE3BA0A00AA2A84 /* DemoListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3425752EE3BA0A00AA2A84 /* DemoListViewController.swift */; };
 		3B7394522EE25CB900DF2DCF /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 3B7394452EE25CB900DF2DCF /* README.md */; };
 		3B7394532EE25CB900DF2DCF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B7394482EE25CB900DF2DCF /* Assets.xcassets */; };
 		3B7394552EE25CB900DF2DCF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3B73944B2EE25CB900DF2DCF /* LaunchScreen.storyboard */; };
@@ -21,7 +28,7 @@
 		3B73945D2EE25CB900DF2DCF /* PageScrollCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394442EE25CB900DF2DCF /* PageScrollCache.swift */; };
 		3B73945E2EE25CB900DF2DCF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394472EE25CB900DF2DCF /* AppDelegate.swift */; };
 		3B73945F2EE25CB900DF2DCF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B73944F2EE25CB900DF2DCF /* SceneDelegate.swift */; };
-		3B7394602EE25CB900DF2DCF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394502EE25CB900DF2DCF /* ViewController.swift */; };
+		3B7394602EE25CB900DF2DCF /* PagerDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394502EE25CB900DF2DCF /* PagerDemoViewController.swift */; };
 		3B7394682EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394622EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift */; };
 		3B7394692EE31ACC00DF2DCF /* DemoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394642EE31ACC00DF2DCF /* DemoModels.swift */; };
 		3B73946A2EE31ACC00DF2DCF /* DemoPageDataAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394652EE31ACC00DF2DCF /* DemoPageDataAdapter.swift */; };
@@ -33,11 +40,20 @@
 		3B7394762EE329A200DF2DCF /* PageableProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394712EE329A200DF2DCF /* PageableProtocols.swift */; };
 		3B7394772EE329A200DF2DCF /* PageableModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394702EE329A200DF2DCF /* PageableModels.swift */; };
 		3B7394782EE329A200DF2DCF /* pageable.md in Resources */ = {isa = PBXBuildFile; fileRef = 3B7394732EE329A200DF2DCF /* pageable.md */; };
+		3B73947F2EE3AFE900DF2DCF /* PageableViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B73947E2EE3AFE900DF2DCF /* PageableViewContainer.swift */; };
+		3B7394812EE3B00900DF2DCF /* PageableViewProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7394802EE3B00900DF2DCF /* PageableViewProtocols.swift */; };
 		3BEAFEF12EE1DC4C0019E77E /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF02EE1DC4C0019E77E /* LookinServer */; };
 		3BEAFEF42EE1DC5C0019E77E /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3BEAFEF32EE1DC5C0019E77E /* SnapKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3B3425652EE3B9CF00AA2A84 /* NewsItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsItem.swift; sourceTree = "<group>"; };
+		3B3425672EE3B9CF00AA2A84 /* PageableDemoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableDemoViewController.swift; sourceTree = "<group>"; };
+		3B3425682EE3B9CF00AA2A84 /* NewsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsService.swift; sourceTree = "<group>"; };
+		3B34256A2EE3B9CF00AA2A84 /* NewsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsCell.swift; sourceTree = "<group>"; };
+		3B34256B2EE3B9CF00AA2A84 /* NewsStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsStateView.swift; sourceTree = "<group>"; };
+		3B34256D2EE3B9CF00AA2A84 /* NewsDemoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsDemoViewModel.swift; sourceTree = "<group>"; };
+		3B3425752EE3BA0A00AA2A84 /* DemoListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoListViewController.swift; sourceTree = "<group>"; };
 		3B73943E2EE25CB900DF2DCF /* PagerMenuDefaultCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagerMenuDefaultCell.swift; sourceTree = "<group>"; };
 		3B73943F2EE25CB900DF2DCF /* PagerPageDataCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagerPageDataCell.swift; sourceTree = "<group>"; };
 		3B7394412EE25CB900DF2DCF /* MultiCategoryPagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiCategoryPagerView.swift; sourceTree = "<group>"; };
@@ -52,7 +68,7 @@
 		3B73944C2EE25CB900DF2DCF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		3B73944E2EE25CB900DF2DCF /* REAMDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = REAMDE.md; sourceTree = "<group>"; };
 		3B73944F2EE25CB900DF2DCF /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		3B7394502EE25CB900DF2DCF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		3B7394502EE25CB900DF2DCF /* PagerDemoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagerDemoViewController.swift; sourceTree = "<group>"; };
 		3B7394612EE31ACC00DF2DCF /* DemoDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoDataStore.swift; sourceTree = "<group>"; };
 		3B7394622EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoLoadMoreProvider.swift; sourceTree = "<group>"; };
 		3B7394632EE31ACC00DF2DCF /* DemoMenuProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMenuProvider.swift; sourceTree = "<group>"; };
@@ -64,6 +80,8 @@
 		3B7394712EE329A200DF2DCF /* PageableProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableProtocols.swift; sourceTree = "<group>"; };
 		3B7394722EE329A200DF2DCF /* PageableViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableViewModel.swift; sourceTree = "<group>"; };
 		3B7394732EE329A200DF2DCF /* pageable.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = pageable.md; sourceTree = "<group>"; };
+		3B73947E2EE3AFE900DF2DCF /* PageableViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableViewContainer.swift; sourceTree = "<group>"; };
+		3B7394802EE3B00900DF2DCF /* PageableViewProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableViewProtocols.swift; sourceTree = "<group>"; };
 		3BEAFED72EE1DBEA0019E77E /* ViewPagerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ViewPagerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7056E61ABEAE327E41EAEDA2 /* Pods_ViewPagerDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ViewPagerDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFBF1E3CE1A21F4757F2EC9A /* Pods-ViewPagerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ViewPagerDemo.release.xcconfig"; path = "Target Support Files/Pods-ViewPagerDemo/Pods-ViewPagerDemo.release.xcconfig"; sourceTree = "<group>"; };
@@ -84,6 +102,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3B3425662EE3B9CF00AA2A84 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				3B3425652EE3B9CF00AA2A84 /* NewsItem.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		3B3425692EE3B9CF00AA2A84 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				3B3425682EE3B9CF00AA2A84 /* NewsService.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		3B34256C2EE3B9CF00AA2A84 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				3B34256A2EE3B9CF00AA2A84 /* NewsCell.swift */,
+				3B34256B2EE3B9CF00AA2A84 /* NewsStateView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		3B34256E2EE3B9CF00AA2A84 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				3B34256D2EE3B9CF00AA2A84 /* NewsDemoViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
 		3B7394402EE25CB900DF2DCF /* Cells */ = {
 			isa = PBXGroup;
 			children = (
@@ -113,7 +164,6 @@
 				3B7394742EE329A200DF2DCF /* Pageable */,
 				3B7394462EE25CB900DF2DCF /* Pager */,
 				3B7394472EE25CB900DF2DCF /* AppDelegate.swift */,
-				3B7394502EE25CB900DF2DCF /* ViewController.swift */,
 				3B73944F2EE25CB900DF2DCF /* SceneDelegate.swift */,
 				3B7394482EE25CB900DF2DCF /* Assets.xcassets */,
 				3B7394492EE25CB900DF2DCF /* Info.plist */,
@@ -128,12 +178,9 @@
 		3B7394672EE31ACC00DF2DCF /* Demo */ = {
 			isa = PBXGroup;
 			children = (
-				3B7394612EE31ACC00DF2DCF /* DemoDataStore.swift */,
-				3B7394622EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift */,
-				3B7394632EE31ACC00DF2DCF /* DemoMenuProvider.swift */,
-				3B7394642EE31ACC00DF2DCF /* DemoModels.swift */,
-				3B7394652EE31ACC00DF2DCF /* DemoPageDataAdapter.swift */,
-				3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */,
+				3BD0A0102F00000100000001 /* PagerDemo */,
+				3BD0A0112F00000100000001 /* PageableDemo */,
+				3B3425752EE3BA0A00AA2A84 /* DemoListViewController.swift */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -141,12 +188,40 @@
 		3B7394742EE329A200DF2DCF /* Pageable */ = {
 			isa = PBXGroup;
 			children = (
+				3B7394802EE3B00900DF2DCF /* PageableViewProtocols.swift */,
+				3B73947E2EE3AFE900DF2DCF /* PageableViewContainer.swift */,
 				3B7394702EE329A200DF2DCF /* PageableModels.swift */,
 				3B7394712EE329A200DF2DCF /* PageableProtocols.swift */,
 				3B7394722EE329A200DF2DCF /* PageableViewModel.swift */,
 				3B7394732EE329A200DF2DCF /* pageable.md */,
 			);
 			path = Pageable;
+			sourceTree = "<group>";
+		};
+		3BD0A0102F00000100000001 /* PagerDemo */ = {
+			isa = PBXGroup;
+			children = (
+				3B7394612EE31ACC00DF2DCF /* DemoDataStore.swift */,
+				3B7394622EE31ACC00DF2DCF /* DemoLoadMoreProvider.swift */,
+				3B7394632EE31ACC00DF2DCF /* DemoMenuProvider.swift */,
+				3B7394642EE31ACC00DF2DCF /* DemoModels.swift */,
+				3B7394652EE31ACC00DF2DCF /* DemoPageDataAdapter.swift */,
+				3B7394662EE31ACC00DF2DCF /* DemoPageStateProvider.swift */,
+				3B7394502EE25CB900DF2DCF /* PagerDemoViewController.swift */,
+			);
+			path = PagerDemo;
+			sourceTree = "<group>";
+		};
+		3BD0A0112F00000100000001 /* PageableDemo */ = {
+			isa = PBXGroup;
+			children = (
+				3B3425672EE3B9CF00AA2A84 /* PageableDemoViewController.swift */,
+				3B3425662EE3B9CF00AA2A84 /* Model */,
+				3B3425692EE3B9CF00AA2A84 /* Service */,
+				3B34256C2EE3B9CF00AA2A84 /* View */,
+				3B34256E2EE3B9CF00AA2A84 /* ViewModel */,
+			);
+			path = PageableDemo;
 			sourceTree = "<group>";
 		};
 		3BEAFECE2EE1DBEA0019E77E = {
@@ -317,6 +392,12 @@
 			files = (
 				3B7394582EE25CB900DF2DCF /* PagerMenuDefaultCell.swift in Sources */,
 				3B7394592EE25CB900DF2DCF /* PagerPageDataCell.swift in Sources */,
+				3B34256F2EE3B9CF00AA2A84 /* NewsItem.swift in Sources */,
+				3B3425702EE3B9CF00AA2A84 /* NewsService.swift in Sources */,
+				3B3425712EE3B9CF00AA2A84 /* NewsStateView.swift in Sources */,
+				3B3425722EE3B9CF00AA2A84 /* NewsCell.swift in Sources */,
+				3B3425732EE3B9CF00AA2A84 /* PageableDemoViewController.swift in Sources */,
+				3B3425742EE3B9CF00AA2A84 /* NewsDemoViewModel.swift in Sources */,
 				3B73945A2EE25CB900DF2DCF /* MultiCategoryPagerView.swift in Sources */,
 				3B73945B2EE25CB900DF2DCF /* PagerModels.swift in Sources */,
 				3B73945C2EE25CB900DF2DCF /* PagerProtocols.swift in Sources */,
@@ -326,13 +407,16 @@
 				3B73946B2EE31ACC00DF2DCF /* DemoMenuProvider.swift in Sources */,
 				3B73946C2EE31ACC00DF2DCF /* DemoPageStateProvider.swift in Sources */,
 				3B73946D2EE31ACC00DF2DCF /* DemoDataStore.swift in Sources */,
+				3B7394812EE3B00900DF2DCF /* PageableViewProtocols.swift in Sources */,
 				3B7394752EE329A200DF2DCF /* PageableViewModel.swift in Sources */,
 				3B7394762EE329A200DF2DCF /* PageableProtocols.swift in Sources */,
+				3B3425762EE3BA0A00AA2A84 /* DemoListViewController.swift in Sources */,
 				3B7394772EE329A200DF2DCF /* PageableModels.swift in Sources */,
+				3B73947F2EE3AFE900DF2DCF /* PageableViewContainer.swift in Sources */,
 				3B73945D2EE25CB900DF2DCF /* PageScrollCache.swift in Sources */,
 				3B73945E2EE25CB900DF2DCF /* AppDelegate.swift in Sources */,
 				3B73945F2EE25CB900DF2DCF /* SceneDelegate.swift in Sources */,
-				3B7394602EE25CB900DF2DCF /* ViewController.swift in Sources */,
+				3B7394602EE25CB900DF2DCF /* PagerDemoViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,7 +455,6 @@
 				INFOPLIST_FILE = ViewPagerDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -405,7 +488,6 @@
 				INFOPLIST_FILE = ViewPagerDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;

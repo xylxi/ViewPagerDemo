@@ -3,65 +3,208 @@ import Combine
 import SnapKit
 import MJRefresh
 
+// MARK: - Architecture Overview
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                        PageableViewContainer 架构                            │
+// ├─────────────────────────────────────────────────────────────────────────────┤
+// │                                                                             │
+// │  ┌─────────────────┐         Combine          ┌──────────────────────┐     │
+// │  │                 │ ──────────────────────── │                      │     │
+// │  │  PageableView-  │  viewState / items /     │   PageableView-      │     │
+// │  │    Model        │  loadMoreState           │     Container        │     │
+// │  │                 │ ◀──────────────────────  │                      │     │
+// │  └─────────────────┘   refresh / loadMore     └──────────────────────┘     │
+// │          │                                              │                  │
+// │          │                                              │                  │
+// │          ▼                                              ▼                  │
+// │  ┌─────────────────┐                          ┌──────────────────────┐     │
+// │  │   PageResult    │                          │   UICollectionView   │     │
+// │  │  (items+cursor) │                          │  + DiffableDataSource│     │
+// │  └─────────────────┘                          └──────────────────────┘     │
+// │                                                         │                  │
+// │                                                         ▼                  │
+// │                                               ┌──────────────────────┐     │
+// │                                               │ Extensible Components│     │
+// │                                               ├──────────────────────┤     │
+// │                                               │ • CellConfigurator   │     │
+// │                                               │ • StateViewProvider  │     │
+// │                                               │ • SelectionHandler   │     │
+// │                                               │ • RefreshHeader      │     │
+// │                                               │ • LoadMoreFooter     │     │
+// │                                               └──────────────────────┘     │
+// │                                                                             │
+// └─────────────────────────────────────────────────────────────────────────────┘
+//
+// MARK: - State Flow
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                              状态流转图                                      │
+// ├─────────────────────────────────────────────────────────────────────────────┤
+// │                                                                             │
+// │  ViewState:                                                                 │
+// │  ┌───────┐  loadInitial()  ┌─────────┐  success(empty)  ┌───────┐          │
+// │  │ idle  │ ───────────────▶│ loading │ ────────────────▶│ empty │          │
+// │  └───────┘                 └─────────┘                  └───────┘          │
+// │                                  │                                          │
+// │                                  │ success(hasData)                         │
+// │                                  ▼                                          │
+// │                            ┌──────────┐  refresh()  ┌─────────┐            │
+// │                            │  loaded  │ ◀──────────▶│ loading │            │
+// │                            └──────────┘             └─────────┘            │
+// │                                  │                       │                  │
+// │                                  │ failure               │ failure          │
+// │                                  ▼                       ▼                  │
+// │                            ┌──────────┐            ┌──────────┐            │
+// │                            │  failed  │ ◀─────────▶│  failed  │            │
+// │                            └──────────┘  retry()   └──────────┘            │
+// │                                                                             │
+// │  LoadMoreState:                                                             │
+// │  ┌───────┐  loadMore()  ┌─────────┐  success  ┌───────┐                    │
+// │  │ idle  │ ────────────▶│ loading │ ─────────▶│ idle  │ (hasMore)          │
+// │  └───────┘              └─────────┘           └───────┘                    │
+// │                              │                    │                         │
+// │                              │ failure            │ success (!hasMore)      │
+// │                              ▼                    ▼                         │
+// │                         ┌────────┐          ┌────────────┐                  │
+// │                         │ failed │          │ noMoreData │                  │
+// │                         └────────┘          └────────────┘                  │
+// │                                                                             │
+// └─────────────────────────────────────────────────────────────────────────────┘
+//
+// MARK: - Component Responsibilities
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                              组件职责                                        │
+// ├─────────────────────────────────────────────────────────────────────────────┤
+// │                                                                             │
+// │  PageableViewContainer (本类)                                               │
+// │  ├── 职责：UI 容器，负责组装和协调各组件                                       │
+// │  ├── 绑定 ViewModel 状态变化                                                 │
+// │  ├── 管理 CollectionView + DiffableDataSource                               │
+// │  ├── 管理 StateView 的添加/移除                                              │
+// │  └── 管理 RefreshHeader / LoadMoreFooter                                    │
+// │                                                                             │
+// │  PageableCellConfiguring (协议)                                             │
+// │  ├── 职责：Cell 配置，外部注入                                               │
+// │  ├── registerCells(in:) - 注册 Cell                                         │
+// │  ├── collectionView(_:cellFor:at:) - 配置 Cell                              │
+// │  └── layout(for:) - 提供布局                                                │
+// │                                                                             │
+// │  PageableStateView (协议)                                                   │
+// │  ├── 职责：状态视图，内部闭环处理状态变化                                      │
+// │  └── updateState(_:retryAction:) - 响应状态变化                              │
+// │                                                                             │
+// │  PageableStateViewProviding (协议)                                          │
+// │  ├── 职责：状态视图工厂                                                      │
+// │  └── makeStateView() - 创建状态视图实例                                      │
+// │                                                                             │
+// │  PageableItemSelectionHandling (协议)                                       │
+// │  ├── 职责：处理 Item 点击事件                                                │
+// │  └── didSelectItem(_:at:) - 响应点击                                        │
+// │                                                                             │
+// │  MJRefreshHeader / MJRefreshFooter (外部依赖)                               │
+// │  ├── 职责：下拉刷新 / 加载更多 UI                                            │
+// │  └── 支持注入任意 MJRefresh 子类                                             │
+// │                                                                             │
+// │  PageableEventTracking (协议)                                               │
+// │  ├── 职责：事件追踪，用于埋点上报                                             │
+// │  ├── 加载事件：initialStart/Success/Failure, refreshStart/Success/Failure  │
+// │  ├── 加载更多：loadMoreStart/Success/Failure                                │
+// │  ├── Item 曝光：itemExposure(item, index)                                   │
+// │  └── Item 点击：itemClick(item, index)                                      │
+// │                                                                             │
+// └─────────────────────────────────────────────────────────────────────────────┘
+//
+// MARK: - Usage Examples
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │                              使用示例                                        │
+// ├─────────────────────────────────────────────────────────────────────────────┤
+// │                                                                             │
+// │  // 1. 基础用法                                                              │
+// │  let vm = PageableViewModel<Item, Int>(initialCursor: 0) { page in          │
+// │      try await api.fetch(page: page)                                        │
+// │  }                                                                          │
+// │  let container = PageableViewContainer(                                     │
+// │      viewModel: vm,                                                         │
+// │      cellConfigurator: MyCellConfigurator()                                 │
+// │  )                                                                          │
+// │  vm.loadInitial()                                                           │
+// │                                                                             │
+// │  // 2. 自定义状态视图                                                         │
+// │  let container = PageableViewContainer(                                     │
+// │      viewModel: vm,                                                         │
+// │      cellConfigurator: config,                                              │
+// │      stateViewProvider: CustomStateViewProvider()                           │
+// │  )                                                                          │
+// │                                                                             │
+// │  // 3. 自定义刷新控件                                                         │
+// │  let container = PageableViewContainer(                                     │
+// │      viewModel: vm,                                                         │
+// │      cellConfigurator: config,                                              │
+// │      refreshHeader: MJRefreshGifHeader(),                                   │
+// │      loadMoreFooter: MJRefreshBackNormalFooter()                            │
+// │  )                                                                          │
+// │                                                                             │
+// │  // 4. 禁用刷新功能                                                           │
+// │  let container = PageableViewContainer(                                     │
+// │      viewModel: vm,                                                         │
+// │      cellConfigurator: config,                                              │
+// │      refreshHeader: nil,      // 禁用下拉刷新                                 │
+// │      loadMoreFooter: nil      // 禁用加载更多                                 │
+// │  )                                                                          │
+// │                                                                             │
+// │  // 5. 处理点击事件                                                           │
+// │  let container = PageableViewContainer(                                     │
+// │      viewModel: vm,                                                         │
+// │      cellConfigurator: config,                                              │
+// │      selectionHandler: MySelectionHandler()                                 │
+// │  )                                                                          │
+// │                                                                             │
+// │  // 6. 埋点追踪                                                               │
+// │  class MyTracker: PageableEventTracking {                                   │
+// │      func onEvent(_ event: PageableEvent<Item>) {                           │
+// │          switch event {                                                     │
+// │          case .load(let e): trackLoad(e)                                    │
+// │          case .itemExposure(let item, let idx): trackExposure(item, idx)    │
+// │          case .itemClick(let item, let idx): trackClick(item, idx)          │
+// │          }                                                                  │
+// │      }                                                                      │
+// │  }                                                                          │
+// │  let container = PageableViewContainer(                                     │
+// │      viewModel: vm,                                                         │
+// │      cellConfigurator: config,                                              │
+// │      eventTracker: MyTracker()                                              │
+// │  )                                                                          │
+// │                                                                             │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
 /// 通用分页视图容器
 ///
 /// 基于 PageableViewModel 的 UI 容器，自动响应 ViewModel 的状态变化并渲染对应的 UI。
 ///
-/// 功能特性：
+/// ## 功能特性
 /// - 自动根据 ViewState 切换视图（loading/empty/error/loaded）
 /// - 使用 UICollectionViewDiffableDataSource 驱动数据渲染
 /// - 使用 Combine 进行数据绑定
-/// - 支持下拉刷新和加载更多
-/// - 支持外部定制 Cell 和状态视图
+/// - 支持下拉刷新和加载更多（可注入自定义 MJRefresh 子类）
+/// - 支持外部定制 Cell、状态视图、点击处理
 ///
-/// 泛型参数：
+/// ## 泛型参数
 /// - `Item`: 数据项类型（需要实现 Hashable）
 /// - `Cursor`: 游标类型
 ///
-/// 使用示例：
-/// ```swift
-/// // 1. 创建 ViewModel
-/// let viewModel = PageableViewModel<NewsItem, Int>(initialCursor: 0) { page in
-///     try await api.fetchNews(page: page)
-/// }
-///
-/// // 2. 实现 Cell 配置协议
-/// class NewsCellConfigurator: PageableCellConfiguring {
-///     func registerCells(in collectionView: UICollectionView) {
-///         collectionView.register(NewsCell.self, forCellWithReuseIdentifier: "NewsCell")
-///     }
-///
-///     func collectionView(_ collectionView: UICollectionView, cellFor item: NewsItem, at indexPath: IndexPath) -> UICollectionViewCell {
-///         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "NewsCell", for: indexPath) as! NewsCell
-///         cell.configure(with: item)
-///         return cell
-///     }
-///
-///     func layout(for collectionView: UICollectionView) -> UICollectionViewLayout {
-///         let layout = UICollectionViewFlowLayout()
-///         layout.itemSize = CGSize(width: collectionView.bounds.width, height: 100)
-///         return layout
-///     }
-/// }
-///
-/// // 3. 创建视图容器
-/// let container = PageableViewContainer(
-///     viewModel: viewModel,
-///     cellConfigurator: NewsCellConfigurator()
-/// )
-///
-/// // 4. 开始加载
-/// viewModel.loadInitial()
-/// ```
-public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
+/// ## 设计原则
+/// - **组合优于继承**：通过协议注入各组件，而非子类化
+/// - **职责单一**：Container 只负责组装和协调，具体逻辑由各组件实现
+/// - **状态内聚**：StateView 内部闭环处理所有状态，Container 只负责添加/移除
+/// - **按需创建**：StateView 在需要时创建，成功后移除，节省内存
+public final class PageableViewContainer<Item: Hashable, Cursor>: UIView, UICollectionViewDelegate {
 
     // MARK: - Type Aliases
 
     public typealias ViewModel = PageableViewModel<Item, Cursor>
     public typealias CellConfigurator = any PageableCellConfiguring<Item>
-    public typealias StateViewProvider = any PageableStateViewProviding
+    public typealias StateViewProvider = PageableStateViewProviding
     public typealias SelectionHandler = any PageableItemSelectionHandling<Item>
-    public typealias LoadMoreHandler = any PageableLoadMoreHandling
+    public typealias EventTracker = any PageableEventTracking<Item>
 
     // MARK: - Public Properties
 
@@ -71,24 +214,24 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
     /// Cell 配置器
     public let cellConfigurator: CellConfigurator
 
-    /// 状态视图提供者（可选）
-    public var stateViewProvider: StateViewProvider?
+    /// 状态视图提供者
+    public var stateViewProvider: StateViewProvider
 
     /// Item 选中处理器（可选）
     public var selectionHandler: SelectionHandler?
 
-    /// 加载更多处理器（可选）
-    public var loadMoreHandler: LoadMoreHandler?
-
-    /// 是否启用下拉刷新（默认 true）
-    public var enablePullToRefresh: Bool = true {
-        didSet { updateRefreshHeader() }
+    /// 下拉刷新 Header（设置 nil 禁用下拉刷新）
+    public var refreshHeader: MJRefreshHeader? {
+        didSet { setupRefreshHeader() }
     }
 
-    /// 是否启用加载更多（默认 true）
-    public var enableLoadMore: Bool = true {
-        didSet { updateLoadMoreFooter() }
+    /// 加载更多 Footer（设置 nil 禁用加载更多）
+    public var loadMoreFooter: MJRefreshFooter? {
+        didSet { setupLoadMoreFooter() }
     }
+
+    /// 事件追踪器（可选，用于埋点上报）
+    public var eventTracker: EventTracker?
 
     // MARK: - Private Properties
 
@@ -98,13 +241,22 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
     /// Combine 订阅
     private var cancellables = Set<AnyCancellable>()
 
-    /// 当前显示的状态视图
-    private var currentStateView: UIView?
+    /// 当前状态视图（按需创建）
+    private var stateView: PageableStateView?
+
+    /// 上一次 ViewState（用于事件追踪）
+    private var previousViewState: ViewState = .idle
+
+    /// 上一次 LoadMoreState（用于事件追踪）
+    private var previousLoadMoreState: LoadMoreState = .idle
+
+    /// 当前加载更多的页码（用于事件追踪）
+    private var currentLoadMorePage: Int = 0
 
     // MARK: - UI Components
 
     /// 数据列表 CollectionView
-    private lazy var collectionView: UICollectionView = {
+    private(set) lazy var collectionView: UICollectionView = {
         let layout = cellConfigurator.layout(for: UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()))
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
@@ -114,14 +266,6 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
         return collectionView
     }()
 
-    /// 状态视图容器（用于显示 loading/empty/error）
-    private let stateViewContainer: UIView = {
-        let view = UIView()
-        view.backgroundColor = .clear
-        view.isHidden = true
-        return view
-    }()
-
     // MARK: - Initialization
 
     /// 初始化分页视图容器
@@ -129,21 +273,27 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
     /// - Parameters:
     ///   - viewModel: 分页 ViewModel
     ///   - cellConfigurator: Cell 配置器
-    ///   - stateViewProvider: 状态视图提供者（可选）
+    ///   - stateViewProvider: 状态视图提供者（默认使用 DefaultStateViewProvider）
     ///   - selectionHandler: Item 选中处理器（可选）
-    ///   - loadMoreHandler: 加载更多处理器（可选）
+    ///   - eventTracker: 事件追踪器（可选，用于埋点上报）
+    ///   - refreshHeader: 下拉刷新 Header（默认使用 MJRefreshNormalHeader）
+    ///   - loadMoreFooter: 加载更多 Footer（默认使用 MJRefreshAutoNormalFooter）
     public init(
         viewModel: ViewModel,
         cellConfigurator: CellConfigurator,
-        stateViewProvider: StateViewProvider? = nil,
+        stateViewProvider: StateViewProvider = DefaultStateViewProvider(),
         selectionHandler: SelectionHandler? = nil,
-        loadMoreHandler: LoadMoreHandler? = nil
+        eventTracker: EventTracker? = nil,
+        refreshHeader: MJRefreshHeader? = nil,
+        loadMoreFooter: MJRefreshFooter? = MJRefreshAutoNormalFooter()
     ) {
         self.viewModel = viewModel
         self.cellConfigurator = cellConfigurator
         self.stateViewProvider = stateViewProvider
         self.selectionHandler = selectionHandler
-        self.loadMoreHandler = loadMoreHandler
+        self.eventTracker = eventTracker
+        self.refreshHeader = refreshHeader
+        self.loadMoreFooter = loadMoreFooter
         super.init(frame: .zero)
         setup()
         bindViewModel()
@@ -159,13 +309,8 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
         backgroundColor = .systemBackground
 
         addSubview(collectionView)
-        addSubview(stateViewContainer)
 
         collectionView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-
-        stateViewContainer.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
 
@@ -176,8 +321,8 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
         setupDataSource()
 
         // 配置刷新控件
-        updateRefreshHeader()
-        updateLoadMoreFooter()
+        setupRefreshHeader()
+        setupLoadMoreFooter()
     }
 
     private func setupDataSource() {
@@ -206,6 +351,16 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
             }
             .store(in: &cancellables)
 
+        // 绑定 isRefreshing（刷新结束时停止 header 动画）
+        viewModel.$isRefreshing
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isRefreshing in
+                if !isRefreshing {
+                    self?.collectionView.mj_header?.endRefreshing()
+                }
+            }
+            .store(in: &cancellables)
+
         // 绑定 LoadMoreState
         viewModel.$loadMoreState
             .receive(on: DispatchQueue.main)
@@ -218,38 +373,46 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
     // MARK: - State Handling
 
     private func handleViewStateChange(_ state: ViewState) {
+        defer { previousViewState = state }
+
+        // 刷新时不结束 header 动画，由 isRefreshing 绑定控制
+        if !viewModel.isRefreshing {
+            hideRefreshHeader()
+        }
+
+        // 事件追踪
+        trackViewStateEvent(from: previousViewState, to: state)
+
         switch state {
         case .idle:
-            hideStateView()
-            hideRefreshHeader()
+            removeStateView()
 
         case .loading:
-            showLoadingView()
-            hideRefreshHeader()
+            // 如果正在刷新（已有数据），不显示全屏 loading
+            if !viewModel.isRefreshing {
+                showStateView(state: state)
+            }
 
-        case .empty:
-            showEmptyView()
-            hideRefreshHeader()
-
-        case .failed(let error):
-            showErrorView(error: error)
-            hideRefreshHeader()
+        case .empty, .failed:
+            showStateView(state: state)
 
         case .loaded:
-            hideStateView()
-            hideRefreshHeader()
+            removeStateView()
         }
     }
 
     private func handleLoadMoreStateChange(_ state: LoadMoreState) {
-        updateLoadMoreFooter()
+        defer { previousLoadMoreState = state }
+
+        // 事件追踪
+        trackLoadMoreStateEvent(from: previousLoadMoreState, to: state)
 
         switch state {
         case .idle:
             collectionView.mj_footer?.resetNoMoreData()
 
         case .loading:
-            collectionView.mj_footer?.beginRefreshing()
+            currentLoadMorePage += 1
 
         case .noMoreData:
             collectionView.mj_footer?.endRefreshingWithNoMoreData()
@@ -259,42 +422,108 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
         }
     }
 
+    // MARK: - Event Tracking
+
+    private func trackViewStateEvent(from oldState: ViewState, to newState: ViewState) {
+        guard let tracker = eventTracker else { return }
+
+        // 进入 loading 状态
+        if case .loading = newState {
+            // 判断是首次加载还是刷新
+            if case .idle = oldState {
+                tracker.onEvent(.load(.initialStart))
+            } else {
+                tracker.onEvent(.load(.refreshStart))
+            }
+        }
+
+        // 从 loading 状态退出
+        if case .loading = oldState {
+            switch newState {
+            case .loaded, .empty:
+                let itemCount = viewModel.items.count
+                // 判断是首次加载成功还是刷新成功
+                if previousViewState == .idle || (previousViewState == .loading && currentLoadMorePage == 0) {
+                    tracker.onEvent(.load(.initialSuccess(itemCount: itemCount)))
+                } else {
+                    tracker.onEvent(.load(.refreshSuccess(itemCount: itemCount)))
+                }
+
+            case .failed(let error):
+                if previousViewState == .idle {
+                    tracker.onEvent(.load(.initialFailure(error: error)))
+                } else {
+                    tracker.onEvent(.load(.refreshFailure(error: error)))
+                }
+
+            default:
+                break
+            }
+        }
+    }
+
+    private func trackLoadMoreStateEvent(from oldState: LoadMoreState, to newState: LoadMoreState) {
+        guard let tracker = eventTracker else { return }
+
+        // 进入 loading 状态
+        if case .loading = newState {
+            tracker.onEvent(.load(.loadMoreStart(page: currentLoadMorePage + 1)))
+        }
+
+        // 从 loading 状态退出
+        if case .loading = oldState {
+            switch newState {
+            case .idle:
+                tracker.onEvent(.load(.loadMoreSuccess(
+                    page: currentLoadMorePage,
+                    itemCount: viewModel.items.count,
+                    hasMore: true
+                )))
+
+            case .noMoreData:
+                tracker.onEvent(.load(.loadMoreSuccess(
+                    page: currentLoadMorePage,
+                    itemCount: viewModel.items.count,
+                    hasMore: false
+                )))
+
+            case .failed:
+                tracker.onEvent(.load(.loadMoreFailure(
+                    page: currentLoadMorePage,
+                    error: NSError(domain: "PageableViewContainer", code: -1, userInfo: [NSLocalizedDescriptionKey: "Load more failed"])
+                )))
+
+            default:
+                break
+            }
+        }
+    }
+
     // MARK: - State View Management
 
-    private func showLoadingView() {
-        let view = stateViewProvider?.loadingView() ?? DefaultLoadingView()
-        showStateView(view)
-    }
+    private func showStateView(state: ViewState) {
+        // 按需创建并添加 stateView
+        if stateView == nil {
+            let view = stateViewProvider.makeStateView()
+            addSubview(view)
+            view.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+            stateView = view
+        }
 
-    private func showEmptyView() {
-        let view = stateViewProvider?.emptyView() ?? DefaultEmptyView()
-        showStateView(view)
-    }
-
-    private func showErrorView(error: ViewStateError) {
-        let view = stateViewProvider?.errorView(error: error, retryAction: { [weak self] in
-            self?.viewModel.retry()
-        }) ?? DefaultErrorView(error: error, retryAction: { [weak self] in
+        stateView?.updateState(state, retryAction: { [weak self] in
             self?.viewModel.retry()
         })
-        showStateView(view)
-    }
-
-    private func showStateView(_ view: UIView) {
-        hideStateView()
-        currentStateView = view
-        stateViewContainer.addSubview(view)
-        view.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        stateViewContainer.isHidden = false
         collectionView.isHidden = true
     }
 
-    private func hideStateView() {
-        currentStateView?.removeFromSuperview()
-        currentStateView = nil
-        stateViewContainer.isHidden = true
+    private func removeStateView() {
+        guard let stateView else { return }
+        // 通知 stateView 当前状态，让其有机会处理（如动画）
+        stateView.updateState(.loaded, retryAction: nil)
+        stateView.removeFromSuperview()
+        self.stateView = nil
         collectionView.isHidden = false
     }
 
@@ -310,143 +539,85 @@ public final class PageableViewContainer<Item: Hashable, Cursor>: UIView {
 
     // MARK: - Refresh Control
 
-    private func updateRefreshHeader() {
-        if enablePullToRefresh {
-            let header = MJRefreshNormalHeader { [weak self] in
-                self?.viewModel.refresh()
-            }
-            collectionView.mj_header = header
-        } else {
+    private func setupRefreshHeader() {
+        guard let header = refreshHeader else {
             collectionView.mj_header = nil
+            return
         }
+        header.refreshingBlock = { [weak self] in
+            self?.viewModel.refresh()
+        }
+        collectionView.mj_header = header
     }
 
     private func hideRefreshHeader() {
         collectionView.mj_header?.endRefreshing()
     }
 
-    private func updateLoadMoreFooter() {
-        guard enableLoadMore else {
+    private func setupLoadMoreFooter() {
+        guard let footer = loadMoreFooter else {
             collectionView.mj_footer = nil
             return
         }
-
-        guard let handler = loadMoreHandler else {
-            // 使用默认 Footer
-            let footer = MJRefreshAutoNormalFooter { [weak self] in
-                self?.viewModel.loadMore()
-            }
-            collectionView.mj_footer = footer
-            return
+        footer.refreshingBlock = { [weak self] in
+            self?.viewModel.loadMore()
         }
-
-        // 使用自定义 Footer
-        if handler.shouldShowLoadMoreFooter(for: viewModel.loadMoreState) {
-            if let customView = handler.loadMoreFooterView(for: viewModel.loadMoreState) {
-                // 自定义视图需要包装成 MJRefreshComponent
-                let footer = MJRefreshAutoNormalFooter { [weak self] in
-                    self?.viewModel.loadMore()
-                }
-                collectionView.mj_footer = footer
-            } else {
-                // 使用默认 Footer
-                let footer = MJRefreshAutoNormalFooter { [weak self] in
-                    self?.viewModel.loadMore()
-                }
-                collectionView.mj_footer = footer
-            }
-        } else {
-            collectionView.mj_footer = nil
-        }
+        collectionView.mj_footer = footer
     }
-}
 
-// MARK: - UICollectionViewDelegate
+    // MARK: - UICollectionViewDelegate
 
-extension PageableViewContainer: UICollectionViewDelegate {
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard indexPath.item < viewModel.items.count else { return }
+        guard indexPath.item < viewModel.items.count else {
+            return
+        }
         let item = viewModel.items[indexPath.item]
+
+        // 事件追踪：点击
+        eventTracker?.onEvent(.itemClick(item: item, index: indexPath.item))
+
         selectionHandler?.didSelectItem(item, at: indexPath)
     }
+
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard indexPath.item < viewModel.items.count else {
+            return
+        }
+        let item = viewModel.items[indexPath.item]
+
+        // 事件追踪：曝光
+        eventTracker?.onEvent(.itemExposure(item: item, index: indexPath.item))
+    }
 }
 
-// MARK: - Default State Views
+// MARK: - Default State View Provider
 
-/// 默认 Loading 视图
-private final class DefaultLoadingView: UIView {
+/// 默认状态视图提供者
+public struct DefaultStateViewProvider: PageableStateViewProviding {
+    public init() {}
+
+    public func makeStateView() -> PageableStateView {
+        DefaultPageableStateView()
+    }
+}
+
+// MARK: - Default Pageable State View
+
+/// 默认状态视图
+///
+/// 内部闭环处理所有状态变化（loading/empty/error）
+public final class DefaultPageableStateView: UIView, PageableStateView {
+
+    // MARK: - UI Components
+
     private let activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.color = .systemGray
-        indicator.startAnimating()
+        indicator.hidesWhenStopped = true
         return indicator
     }()
 
-    private let label: UILabel = {
-        let label = UILabel()
-        label.text = "加载中..."
-        label.font = .systemFont(ofSize: 14)
-        label.textColor = .systemGray
-        label.textAlignment = .center
-        return label
-    }()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setup()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setup() {
-        backgroundColor = .clear
-
-        let stackView = UIStackView(arrangedSubviews: [activityIndicator, label])
-        stackView.axis = .vertical
-        stackView.spacing = 12
-        stackView.alignment = .center
-
-        addSubview(stackView)
-        stackView.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-    }
-}
-
-/// 默认 Empty 视图
-private final class DefaultEmptyView: UIView {
-    private let label: UILabel = {
-        let label = UILabel()
-        label.text = "暂无数据"
-        label.font = .systemFont(ofSize: 16)
-        label.textColor = .systemGray
-        label.textAlignment = .center
-        return label
-    }()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setup()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setup() {
-        backgroundColor = .clear
-        addSubview(label)
-        label.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-    }
-}
-
-/// 默认 Error 视图
-private final class DefaultErrorView: UIView {
-    private let label: UILabel = {
+    private let messageLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textColor = .systemGray
@@ -459,32 +630,44 @@ private final class DefaultErrorView: UIView {
         let button = UIButton(type: .system)
         button.setTitle("重试", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.isHidden = true
         return button
     }()
 
-    private let retryAction: () -> Void
+    private let contentStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 12
+        stackView.alignment = .center
+        return stackView
+    }()
 
-    init(error: ViewStateError, retryAction: @escaping () -> Void) {
-        self.retryAction = retryAction
-        super.init(frame: .zero)
-        label.text = error.message
+    // MARK: - Properties
+
+    private var retryAction: (() -> Void)?
+
+    // MARK: - Initialization
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
         setup()
     }
 
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    // MARK: - Setup
 
     private func setup() {
         backgroundColor = .clear
 
-        let stackView = UIStackView(arrangedSubviews: [label, retryButton])
-        stackView.axis = .vertical
-        stackView.spacing = 16
-        stackView.alignment = .center
+        contentStackView.addArrangedSubview(activityIndicator)
+        contentStackView.addArrangedSubview(messageLabel)
+        contentStackView.addArrangedSubview(retryButton)
 
-        addSubview(stackView)
-        stackView.snp.makeConstraints { make in
+        addSubview(contentStackView)
+        contentStackView.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.leading.greaterThanOrEqualToSuperview().offset(20)
             make.trailing.lessThanOrEqualToSuperview().offset(-20)
@@ -493,7 +676,40 @@ private final class DefaultErrorView: UIView {
         retryButton.addTarget(self, action: #selector(handleRetryTap), for: .touchUpInside)
     }
 
+    // MARK: - PageableStateView
+
+    public func updateState(_ state: ViewState, retryAction: (() -> Void)?) {
+        self.retryAction = retryAction
+
+        switch state {
+        case .idle, .loaded:
+            activityIndicator.stopAnimating()
+            messageLabel.isHidden = true
+            retryButton.isHidden = true
+
+        case .loading:
+            activityIndicator.startAnimating()
+            messageLabel.text = "加载中..."
+            messageLabel.isHidden = false
+            retryButton.isHidden = true
+
+        case .empty:
+            activityIndicator.stopAnimating()
+            messageLabel.text = "暂无数据"
+            messageLabel.isHidden = false
+            retryButton.isHidden = true
+
+        case .failed(let error):
+            activityIndicator.stopAnimating()
+            messageLabel.text = error.message
+            messageLabel.isHidden = false
+            retryButton.isHidden = false
+        }
+    }
+
+    // MARK: - Actions
+
     @objc private func handleRetryTap() {
-        retryAction()
+        retryAction?()
     }
 }

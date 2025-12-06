@@ -56,6 +56,9 @@ public final class PageableViewModel<Item, Cursor>: ObservableObject {
     /// 加载更多状态
     @Published public private(set) var loadMoreState: LoadMoreState = .idle
 
+    /// 是否正在刷新（用于区分首次加载和下拉刷新）
+    @Published public private(set) var isRefreshing: Bool = false
+
     // MARK: - Public State (Read-Only)
 
     /// 当前游标
@@ -129,12 +132,23 @@ public final class PageableViewModel<Item, Cursor>: ObservableObject {
 
     /// 刷新
     ///
-    /// 取消当前请求，重置状态后重新加载
+    /// 取消当前请求后重新加载。
+    /// - 如果已有数据，保持当前列表显示，只显示 header 刷新动画
+    /// - 如果无数据，显示全屏 loading
     public func refresh() {
         loadTask?.cancel()
-        reset()
-        viewState = .loading
-        performLoad(cursor: initialCursor, isLoadMore: false)
+
+        // 如果已有数据，标记为刷新状态，不改变 viewState
+        // 这样可以保持列表显示，避免全屏 loading 覆盖
+        if !items.isEmpty {
+            isRefreshing = true
+            performLoad(cursor: initialCursor, isLoadMore: false)
+        } else {
+            // 无数据时走首次加载逻辑
+            reset()
+            viewState = .loading
+            performLoad(cursor: initialCursor, isLoadMore: false)
+        }
     }
 
     /// 重试
@@ -205,16 +219,22 @@ public final class PageableViewModel<Item, Cursor>: ObservableObject {
         cursor: Cursor,
         isLoadMore: Bool
     ) {
+        // 重置刷新状态
+        let wasRefreshing = isRefreshing
+        isRefreshing = false
+
         if isLoadMore {
             items.append(contentsOf: result.items)
         } else {
             items = result.items
+            // 刷新成功时重置游标
+            currentCursor = initialCursor
         }
 
         currentCursor = cursor
         nextCursor = result.nextCursor
 
-        // 更新视图状态（仅首次加载时更新，loadMore 不改变主状态）
+        // 更新视图状态（仅首次加载/刷新时更新，loadMore 不改变主状态）
         if !isLoadMore {
             if items.isEmpty {
                 viewState = .empty
@@ -235,10 +255,18 @@ public final class PageableViewModel<Item, Cursor>: ObservableObject {
     private func handleFailure(error: Error, isLoadMore: Bool) {
         let stateError = ViewStateError(error)
 
+        // 重置刷新状态
+        let wasRefreshing = isRefreshing
+        isRefreshing = false
+
         if isLoadMore {
             // 加载更多失败不改变主视图状态
             loadMoreState = .failed
+        } else if wasRefreshing {
+            // 刷新失败时保持原有数据和状态，不显示错误页
+            // 可以通过其他方式提示用户（如 Toast）
         } else {
+            // 首次加载失败
             viewState = .failed(stateError)
             loadMoreState = .idle
         }
