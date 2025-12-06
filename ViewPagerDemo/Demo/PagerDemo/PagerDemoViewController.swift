@@ -2,7 +2,8 @@ import Combine
 import UIKit
 import SnapKit
 
-final class ViewController: UIViewController {
+/// 多分类 ViewPager 演示页
+final class PagerDemoViewController: UIViewController {
 
     // MARK: - Properties
 
@@ -25,6 +26,7 @@ final class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = "Pager Demo"
         view.backgroundColor = .systemBackground
         setupPager()
         loadInitialData()
@@ -129,7 +131,7 @@ final class ViewController: UIViewController {
 
 // MARK: - PagerMenuSelectionHandling
 
-extension ViewController: PagerMenuSelectionHandling {
+extension PagerDemoViewController: PagerMenuSelectionHandling {
     func pagerView(
         _ pagerView: MultiCategoryPagerView,
         didSelect page: PageModel,
@@ -141,7 +143,7 @@ extension ViewController: PagerMenuSelectionHandling {
 
 // MARK: - PagerPageExposureHandling
 
-extension ViewController: PagerPageExposureHandling {
+extension PagerDemoViewController: PagerPageExposureHandling {
     func pagerView(
         _ pagerView: MultiCategoryPagerView,
         didExposePage page: PageModel,
@@ -154,7 +156,7 @@ extension ViewController: PagerPageExposureHandling {
 
 // MARK: - PagerItemExposureHandling
 
-extension ViewController: PagerItemExposureHandling {
+extension PagerDemoViewController: PagerItemExposureHandling {
     func pagerView(
         _ pagerView: MultiCategoryPagerView,
         didExposeItem item: PageItemModel,
