@@ -316,8 +316,8 @@
 			);
 			mainGroup = 3BEAFECE2EE1DBEA0019E77E;
 			packageReferences = (
-				3BEAFEEF2EE1DC4B0019E77E /* XCLocalSwiftPackageReference "../../Documents/iOS4app/LookinServer" */,
-				3BEAFEF22EE1DC5C0019E77E /* XCLocalSwiftPackageReference "../../Documents/iOS4app/SnapKit" */,
+				3BEAFEEF2EE1DC4B0019E77E /* XCLocalSwiftPackageReference "LookinServer" */,
+				3BEAFEF22EE1DC5C0019E77E /* XCLocalSwiftPackageReference "SnapKit" */,
 				3B7394792EE33AFB00DF2DCF /* XCRemoteSwiftPackageReference "PromiseKit" */,
 			);
 			productRefGroup = 3BEAFED82EE1DBEA0019E77E /* Products */;
@@ -355,13 +355,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ViewPagerDemo/Pods-ViewPagerDemo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ViewPagerDemo/Pods-ViewPagerDemo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -661,11 +657,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		3BEAFEEF2EE1DC4B0019E77E /* XCLocalSwiftPackageReference "../../Documents/iOS4app/LookinServer" */ = {
+		3BEAFEEF2EE1DC4B0019E77E /* XCLocalSwiftPackageReference "LookinServer" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../Documents/iOS4app/LookinServer;
 		};
-		3BEAFEF22EE1DC5C0019E77E /* XCLocalSwiftPackageReference "../../Documents/iOS4app/SnapKit" */ = {
+		3BEAFEF22EE1DC5C0019E77E /* XCLocalSwiftPackageReference "SnapKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../Documents/iOS4app/SnapKit;
 		};
