@@ -187,6 +187,16 @@ final class LiquidDemoViewController: UIViewController {
         addSection(title: "嵌套玻璃", description: "多层玻璃叠加效果") {
             self.createNestedGlass()
         }
+
+        // 16. UIGlassContainerEffect 容器效果
+        addSection(title: "UIGlassContainerEffect", description: "多个玻璃视图接近时自动合并") {
+            self.createGlassContainerEffectDemo()
+        }
+
+        // 17. GlassContainerView 封装演示
+        addSection(title: "GlassContainerView", description: "兼容封装容器，低版本自动降级") {
+            self.createGlassContainerDemo()
+        }
     }
 
     private func startBackgroundAnimation() {
@@ -1630,6 +1640,571 @@ final class LiquidDemoViewController: UIViewController {
         }
 
         return outerGlass
+    }
+
+    // MARK: UIGlassContainerEffect 容器效果
+
+    /// 16. UIGlassContainerEffect 容器效果演示
+    private func createGlassContainerEffectDemo() -> UIView {
+        let container = UIStackView()
+        container.axis = .vertical
+        container.spacing = 16
+
+        // 说明信息
+        let infoGlass = UIGlassEffect()
+        let infoView = UIVisualEffectView(effect: infoGlass)
+        infoView.layer.cornerRadius = 16
+        infoView.clipsToBounds = true
+
+        let infoLabel = UILabel()
+        infoLabel.text = "UIGlassContainerEffect 让多个玻璃视图在接近时自动合并边缘，形成统一的视觉效果。\n\n通过 spacing 属性控制合并距离阈值。"
+        infoLabel.font = .systemFont(ofSize: 13)
+        infoLabel.textColor = .secondaryLabel
+        infoLabel.numberOfLines = 0
+
+        infoView.contentView.addSubview(infoLabel)
+        infoLabel.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(12)
+        }
+
+        // 对比示例：无容器 vs 有容器
+        let comparisonStack = UIStackView()
+        comparisonStack.axis = .horizontal
+        comparisonStack.spacing = 16
+        comparisonStack.distribution = .fillEqually
+
+        // 左侧：无容器效果
+        let withoutContainerView = createWithoutContainerExample()
+        // 右侧：有容器效果
+        let withContainerView = createWithContainerExample()
+
+        comparisonStack.addArrangedSubview(withoutContainerView)
+        comparisonStack.addArrangedSubview(withContainerView)
+
+        // 工具栏合并示例
+        let toolbarExample = createContainerToolbarExample()
+
+        // 动态间距演示
+        let dynamicSpacingExample = createDynamicSpacingExample()
+
+        container.addArrangedSubview(infoView)
+        container.addArrangedSubview(comparisonStack)
+        container.addArrangedSubview(toolbarExample)
+        container.addArrangedSubview(dynamicSpacingExample)
+
+        return container
+    }
+
+    /// 无容器效果示例
+    private func createWithoutContainerExample() -> UIView {
+        let wrapper = UIView()
+
+        let titleLabel = UILabel()
+        titleLabel.text = "无容器"
+        titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        titleLabel.textColor = .white
+        titleLabel.textAlignment = .center
+
+        wrapper.addSubview(titleLabel)
+        titleLabel.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+        }
+
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 4
+        stack.alignment = .fill
+
+        for i in 0..<3 {
+            let glassEffect = UIGlassEffect()
+            let glassView = UIVisualEffectView(effect: glassEffect)
+            glassView.layer.cornerRadius = 12
+            glassView.clipsToBounds = true
+
+            let label = UILabel()
+            label.text = "Item \(i + 1)"
+            label.font = .systemFont(ofSize: 14)
+            label.textColor = .label
+            label.textAlignment = .center
+
+            glassView.contentView.addSubview(label)
+            label.snp.makeConstraints { make in
+                make.edges.equalToSuperview().inset(UIEdgeInsets(top: 12, left: 8, bottom: 12, right: 8))
+            }
+
+            stack.addArrangedSubview(glassView)
+        }
+
+        wrapper.addSubview(stack)
+        stack.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+
+        return wrapper
+    }
+
+    /// 有容器效果示例
+    private func createWithContainerExample() -> UIView {
+        let wrapper = UIView()
+
+        let titleLabel = UILabel()
+        titleLabel.text = "有容器 (合并)"
+        titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        titleLabel.textColor = .white
+        titleLabel.textAlignment = .center
+
+        wrapper.addSubview(titleLabel)
+        titleLabel.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+        }
+
+        // 创建容器效果
+        let containerEffect = UIGlassContainerEffect()
+        containerEffect.spacing = 8  // 8pt 内的玻璃视图会合并
+        let containerView = UIVisualEffectView(effect: containerEffect)
+
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 4  // 小于 spacing，会合并
+        stack.alignment = .fill
+
+        for i in 0..<3 {
+            let glassEffect = UIGlassEffect()
+            let glassView = UIVisualEffectView(effect: glassEffect)
+            glassView.layer.cornerRadius = 12
+            glassView.clipsToBounds = true
+
+            let label = UILabel()
+            label.text = "Item \(i + 1)"
+            label.font = .systemFont(ofSize: 14)
+            label.textColor = .label
+            label.textAlignment = .center
+
+            glassView.contentView.addSubview(label)
+            label.snp.makeConstraints { make in
+                make.edges.equalToSuperview().inset(UIEdgeInsets(top: 12, left: 8, bottom: 12, right: 8))
+            }
+
+            stack.addArrangedSubview(glassView)
+        }
+
+        containerView.contentView.addSubview(stack)
+        stack.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+
+        wrapper.addSubview(containerView)
+        containerView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+
+        return wrapper
+    }
+
+    /// 工具栏合并示例
+    private func createContainerToolbarExample() -> UIView {
+        let wrapper = UIView()
+
+        let titleLabel = UILabel()
+        titleLabel.text = "工具栏合并效果"
+        titleLabel.font = .systemFont(ofSize: 14, weight: .medium)
+        titleLabel.textColor = .white
+
+        wrapper.addSubview(titleLabel)
+        titleLabel.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview()
+        }
+
+        // 容器效果
+        let containerEffect = UIGlassContainerEffect()
+        containerEffect.spacing = 12
+        let containerView = UIVisualEffectView(effect: containerEffect)
+
+        let toolbarStack = UIStackView()
+        toolbarStack.axis = .horizontal
+        toolbarStack.spacing = 6
+        toolbarStack.alignment = .center
+        toolbarStack.distribution = .fill
+
+        // 左侧按钮组
+        let leftGroup = createToolbarButtonGroup(icons: ["arrow.left", "arrow.right"])
+
+        // 中间搜索框
+        let searchBar = createToolbarSearchBar()
+
+        // 右侧按钮组
+        let rightGroup = createToolbarButtonGroup(icons: ["square.and.arrow.up", "ellipsis"])
+
+        toolbarStack.addArrangedSubview(leftGroup)
+        toolbarStack.addArrangedSubview(searchBar)
+        toolbarStack.addArrangedSubview(rightGroup)
+
+        containerView.contentView.addSubview(toolbarStack)
+        toolbarStack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(4)
+        }
+
+        wrapper.addSubview(containerView)
+        containerView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+
+        return wrapper
+    }
+
+    private func createToolbarButtonGroup(icons: [String]) -> UIView {
+        let glassEffect = UIGlassEffect()
+        let glassView = UIVisualEffectView(effect: glassEffect)
+        glassView.layer.cornerRadius = 12
+        glassView.clipsToBounds = true
+
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 4
+        stack.alignment = .center
+
+        for icon in icons {
+            let button = UIButton(type: .system)
+            button.setImage(UIImage(systemName: icon), for: .normal)
+            button.tintColor = .label
+            button.snp.makeConstraints { make in
+                make.width.height.equalTo(36)
+            }
+            stack.addArrangedSubview(button)
+        }
+
+        glassView.contentView.addSubview(stack)
+        stack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8))
+        }
+
+        return glassView
+    }
+
+    private func createToolbarSearchBar() -> UIView {
+        let glassEffect = UIGlassEffect()
+        let glassView = UIVisualEffectView(effect: glassEffect)
+        glassView.layer.cornerRadius = 12
+        glassView.clipsToBounds = true
+
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.alignment = .center
+
+        let searchIcon = UIImageView(image: UIImage(systemName: "magnifyingglass"))
+        searchIcon.tintColor = .secondaryLabel
+        searchIcon.snp.makeConstraints { make in
+            make.width.height.equalTo(16)
+        }
+
+        let textField = UITextField()
+        textField.placeholder = "搜索"
+        textField.font = .systemFont(ofSize: 14)
+        textField.borderStyle = .none
+
+        stack.addArrangedSubview(searchIcon)
+        stack.addArrangedSubview(textField)
+
+        glassView.contentView.addSubview(stack)
+        stack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12))
+        }
+
+        return glassView
+    }
+
+    /// 动态间距演示
+    private func createDynamicSpacingExample() -> UIView {
+        let wrapper = UIView()
+
+        let titleStack = UIStackView()
+        titleStack.axis = .horizontal
+        titleStack.alignment = .center
+
+        let titleLabel = UILabel()
+        titleLabel.text = "动态间距"
+        titleLabel.font = .systemFont(ofSize: 14, weight: .medium)
+        titleLabel.textColor = .white
+
+        let spacingLabel = UILabel()
+        spacingLabel.text = "spacing: 20pt"
+        spacingLabel.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
+        spacingLabel.textColor = .white.withAlphaComponent(0.7)
+        spacingLabel.tag = 1001
+
+        titleStack.addArrangedSubview(titleLabel)
+        titleStack.addArrangedSubview(UIView())
+        titleStack.addArrangedSubview(spacingLabel)
+
+        wrapper.addSubview(titleStack)
+        titleStack.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+        }
+
+        // 容器效果
+        let containerEffect = UIGlassContainerEffect()
+        containerEffect.spacing = 20
+        let containerView = UIVisualEffectView(effect: containerEffect)
+        containerView.tag = 1000
+
+        let buttonStack = UIStackView()
+        buttonStack.axis = .horizontal
+        buttonStack.spacing = 16  // 初始间距
+        buttonStack.alignment = .center
+        buttonStack.distribution = .fillEqually
+        buttonStack.tag = 1002
+
+        let icons = ["house.fill", "magnifyingglass", "bell.fill", "person.fill"]
+        for icon in icons {
+            let glassEffect = UIGlassEffect()
+            let glassView = UIVisualEffectView(effect: glassEffect)
+            glassView.layer.cornerRadius = 14
+            glassView.clipsToBounds = true
+
+            let iconView = UIImageView(image: UIImage(systemName: icon))
+            iconView.tintColor = .label
+            iconView.contentMode = .scaleAspectFit
+
+            glassView.contentView.addSubview(iconView)
+            iconView.snp.makeConstraints { make in
+                make.center.equalToSuperview()
+                make.width.height.equalTo(22)
+            }
+
+            glassView.snp.makeConstraints { make in
+                make.height.equalTo(48)
+            }
+
+            buttonStack.addArrangedSubview(glassView)
+        }
+
+        containerView.contentView.addSubview(buttonStack)
+        buttonStack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(4)
+        }
+
+        wrapper.addSubview(containerView)
+        containerView.snp.makeConstraints { make in
+            make.top.equalTo(titleStack.snp.bottom).offset(8)
+            make.leading.trailing.equalToSuperview()
+        }
+
+        // 滑块控制间距
+        let sliderContainer = UIStackView()
+        sliderContainer.axis = .horizontal
+        sliderContainer.spacing = 12
+        sliderContainer.alignment = .center
+
+        let minLabel = UILabel()
+        minLabel.text = "4pt"
+        minLabel.font = .systemFont(ofSize: 11)
+        minLabel.textColor = .white.withAlphaComponent(0.6)
+
+        let slider = UISlider()
+        slider.minimumValue = 4
+        slider.maximumValue = 40
+        slider.value = 16
+        slider.addTarget(self, action: #selector(spacingSliderChanged(_:)), for: .valueChanged)
+
+        let maxLabel = UILabel()
+        maxLabel.text = "40pt"
+        maxLabel.font = .systemFont(ofSize: 11)
+        maxLabel.textColor = .white.withAlphaComponent(0.6)
+
+        sliderContainer.addArrangedSubview(minLabel)
+        sliderContainer.addArrangedSubview(slider)
+        sliderContainer.addArrangedSubview(maxLabel)
+
+        wrapper.addSubview(sliderContainer)
+        sliderContainer.snp.makeConstraints { make in
+            make.top.equalTo(containerView.snp.bottom).offset(12)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+
+        return wrapper
+    }
+
+    @objc private func spacingSliderChanged(_ slider: UISlider) {
+        let spacing = CGFloat(slider.value)
+
+        // 找到容器和标签
+        guard let containerView = view.viewWithTag(1000) as? UIVisualEffectView,
+              let spacingLabel = view.viewWithTag(1001) as? UILabel,
+              let buttonStack = view.viewWithTag(1002) as? UIStackView else {
+            return
+        }
+
+        // 更新容器 spacing
+        let containerEffect = UIGlassContainerEffect()
+        containerEffect.spacing = spacing
+        containerView.effect = containerEffect
+
+        // 更新按钮间距
+        buttonStack.spacing = spacing
+
+        // 更新标签
+        spacingLabel.text = String(format: "spacing: %.0fpt", spacing)
+    }
+
+    // MARK: GlassContainerView 封装演示
+
+    /// 17. GlassContainerView 兼容封装演示
+    private func createGlassContainerDemo() -> UIView {
+        let container = UIStackView()
+        container.axis = .vertical
+        container.spacing = 16
+
+        // 说明
+        let infoContainer = GlassContainerView(style: .regular, cornerRadius: 16)
+        let infoLabel = UILabel()
+        infoLabel.text = "GlassContainerView 封装了版本兼容逻辑：\n• iOS 26+ 自动使用 Liquid Glass\n• 低版本自动降级为模糊效果\n• 使用方式与 UIView 完全一致"
+        infoLabel.font = .systemFont(ofSize: 13)
+        infoLabel.textColor = .secondaryLabel
+        infoLabel.numberOfLines = 0
+
+        infoContainer.contentView.addSubview(infoLabel)
+        infoLabel.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(12)
+        }
+
+        // 基础用法示例
+        let basicContainer = GlassContainerView(style: .regular, cornerRadius: 20)
+        basicContainer.glassTintColor = nil
+
+        let basicStack = UIStackView()
+        basicStack.axis = .vertical
+        basicStack.spacing = 8
+        basicStack.alignment = .leading
+
+        let basicTitle = UILabel()
+        basicTitle.text = "GlassContainerView"
+        basicTitle.font = .boldSystemFont(ofSize: 16)
+        basicTitle.textColor = .label
+
+        let basicCode = UILabel()
+        basicCode.text = "let glass = GlassContainerView()\nglass.cornerRadius = 20\nglass.contentView.addSubview(label)"
+        basicCode.font = .monospacedSystemFont(ofSize: 11, weight: .regular)
+        basicCode.textColor = .secondaryLabel
+        basicCode.numberOfLines = 0
+
+        basicStack.addArrangedSubview(basicTitle)
+        basicStack.addArrangedSubview(basicCode)
+
+        basicContainer.contentView.addSubview(basicStack)
+        basicStack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(16)
+        }
+
+        // GlassButton 示例
+        let buttonStack = UIStackView()
+        buttonStack.axis = .horizontal
+        buttonStack.spacing = 12
+        buttonStack.distribution = .fillEqually
+
+        let primaryButton = createDemoGlassButton(title: "GlassButton", icon: "hand.tap.fill", color: .systemBlue)
+        let secondaryButton = createDemoGlassButton(title: "带色调", icon: "paintbrush.fill", color: .systemPurple)
+        secondaryButton.glassTintColor = .systemPurple
+
+        buttonStack.addArrangedSubview(primaryButton)
+        buttonStack.addArrangedSubview(secondaryButton)
+
+        // GlassCard 示例
+        let card = GlassCard(cornerRadius: 24, insets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20))
+        card.showShadow = true
+
+        let cardStack = UIStackView()
+        cardStack.axis = .vertical
+        cardStack.spacing = 12
+        cardStack.alignment = .leading
+
+        let cardIcon = UIImageView(image: UIImage(systemName: "shippingbox.fill"))
+        cardIcon.tintColor = .systemOrange
+        cardIcon.contentMode = .scaleAspectFit
+        cardIcon.snp.makeConstraints { make in
+            make.width.height.equalTo(32)
+        }
+
+        let cardTitle = UILabel()
+        cardTitle.text = "GlassCard"
+        cardTitle.font = .boldSystemFont(ofSize: 18)
+        cardTitle.textColor = .label
+
+        let cardDesc = UILabel()
+        cardDesc.text = "预设了内边距和阴影的卡片容器，\n自动处理圆角和视觉效果。"
+        cardDesc.font = .systemFont(ofSize: 14)
+        cardDesc.textColor = .secondaryLabel
+        cardDesc.numberOfLines = 0
+
+        cardStack.addArrangedSubview(cardIcon)
+        cardStack.addArrangedSubview(cardTitle)
+        cardStack.addArrangedSubview(cardDesc)
+
+        card.contentView.addSubview(cardStack)
+        cardStack.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+
+        // wrappedInGlass 扩展示例
+        let wrappedLabel = UILabel()
+        wrappedLabel.text = "使用 .wrappedInGlass() 扩展\n快速包装任意视图"
+        wrappedLabel.font = .systemFont(ofSize: 14)
+        wrappedLabel.textColor = .label
+        wrappedLabel.numberOfLines = 0
+        wrappedLabel.textAlignment = .center
+
+        let wrappedContainer = wrappedLabel.wrappedInGlass(
+            style: .regular,
+            cornerRadius: 16,
+            insets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        )
+
+        container.addArrangedSubview(infoContainer)
+        container.addArrangedSubview(basicContainer)
+        container.addArrangedSubview(buttonStack)
+        container.addArrangedSubview(card)
+        container.addArrangedSubview(wrappedContainer)
+
+        return container
+    }
+
+    private func createDemoGlassButton(title: String, icon: String, color: UIColor) -> GlassButton {
+        let button = GlassButton(style: .regular, cornerRadius: 16)
+        button.isInteractive = true
+
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 8
+        stack.alignment = .center
+
+        let iconView = UIImageView(image: UIImage(systemName: icon))
+        iconView.tintColor = color
+        iconView.contentMode = .scaleAspectFit
+        iconView.snp.makeConstraints { make in
+            make.width.height.equalTo(28)
+        }
+
+        let label = UILabel()
+        label.text = title
+        label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.textColor = .label
+
+        stack.addArrangedSubview(iconView)
+        stack.addArrangedSubview(label)
+
+        button.contentView.addSubview(stack)
+        stack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(UIEdgeInsets(top: 16, left: 12, bottom: 16, right: 12))
+        }
+
+        button.onTap = {
+            print("GlassButton tapped: \(title)")
+        }
+
+        return button
     }
 
     // MARK: - Actions

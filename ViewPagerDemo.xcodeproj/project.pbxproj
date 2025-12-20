@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		284B94675FD84074358D6524 /* Pods_ViewPagerDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7056E61ABEAE327E41EAEDA2 /* Pods_ViewPagerDemo.framework */; };
 		3B1643E92EF6F6330026A95B /* LiquidDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1643E72EF6F6330026A95B /* LiquidDemoViewController.swift */; };
+		3B1643EB2EF6FE740026A95B /* GlassContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1643EA2EF6FE740026A95B /* GlassContainerView.swift */; };
 		3B34256F2EE3B9CF00AA2A84 /* NewsItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3425652EE3B9CF00AA2A84 /* NewsItem.swift */; };
 		3B3425702EE3B9CF00AA2A84 /* NewsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3425682EE3B9CF00AA2A84 /* NewsService.swift */; };
 		3B3425712EE3B9CF00AA2A84 /* NewsStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B34256B2EE3B9CF00AA2A84 /* NewsStateView.swift */; };
@@ -51,6 +52,7 @@
 
 /* Begin PBXFileReference section */
 		3B1643E72EF6F6330026A95B /* LiquidDemoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidDemoViewController.swift; sourceTree = "<group>"; };
+		3B1643EA2EF6FE740026A95B /* GlassContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassContainerView.swift; sourceTree = "<group>"; };
 		3B3425652EE3B9CF00AA2A84 /* NewsItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsItem.swift; sourceTree = "<group>"; };
 		3B3425672EE3B9CF00AA2A84 /* PageableDemoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageableDemoViewController.swift; sourceTree = "<group>"; };
 		3B3425682EE3B9CF00AA2A84 /* NewsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsService.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 		3B1643E82EF6F6330026A95B /* LiquidDemo */ = {
 			isa = PBXGroup;
 			children = (
+				3B1643EA2EF6FE740026A95B /* GlassContainerView.swift */,
 				3B1643E72EF6F6330026A95B /* LiquidDemoViewController.swift */,
 			);
 			path = LiquidDemo;
@@ -431,6 +434,7 @@
 				3B7394762EE329A200DF2DCF /* PageableProtocols.swift in Sources */,
 				3B1643E92EF6F6330026A95B /* LiquidDemoViewController.swift in Sources */,
 				3B3425762EE3BA0A00AA2A84 /* DemoListViewController.swift in Sources */,
+				3B1643EB2EF6FE740026A95B /* GlassContainerView.swift in Sources */,
 				3B7394772EE329A200DF2DCF /* PageableModels.swift in Sources */,
 				3B73947F2EE3AFE900DF2DCF /* PageableViewContainer.swift in Sources */,
 				3B73945D2EE25CB900DF2DCF /* PageScrollCache.swift in Sources */,
