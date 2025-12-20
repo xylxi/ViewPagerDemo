@@ -21,6 +21,11 @@ final class DemoListViewController: UITableViewController {
             title: "Pageable - 列表容器",
             subtitle: "PageableViewModel + PageableViewContainer 示例",
             builder: { PageableDemoViewController() }
+        ),
+        DemoItem(
+            title: "Liquid Glass - 玻璃效果",
+            subtitle: "iOS 26+ UIGlassEffect 设计语言示例",
+            builder: { LiquidDemoFactory.makeViewController() }
         )
     ]
 
